@@ -7,18 +7,17 @@ import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.base.domain.entities.User;
 import org.lamisplus.modules.base.service.UserService;
 import org.lamisplus.modules.biometric.domain.Biometric;
-import org.lamisplus.modules.biometric.domain.dto.BiometricDto;
-import org.lamisplus.modules.biometric.domain.dto.BiometricEnrollmentDto;
-import org.lamisplus.modules.biometric.domain.dto.CapturedBiometricDto;
+import org.lamisplus.modules.biometric.domain.dto.*;
+import org.lamisplus.modules.biometric.enumeration.ErrorCode;
 import org.lamisplus.modules.biometric.repository.BiometricRepository;
 import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.patient.repository.PersonRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -27,8 +26,13 @@ import java.util.stream.Collectors;
 public class BiometricService {
     private final BiometricRepository biometricRepository;
     private final PersonRepository personRepository;
-
     private  final UserService userService;
+
+    /*@Value("org.lamisplus.biometric.application-url")
+    private String token;
+
+    @Value("org.lamisplus.biometric.application-token")
+    private String url;*/
 
 
     public BiometricDto biometricEnrollment(BiometricEnrollmentDto biometricEnrollmentDto) {

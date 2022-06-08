@@ -21,6 +21,7 @@ public class BiometricModule extends AcrossModule {
 				getClass ().getPackage ().getName () + ".config",
 				getClass ().getPackage ().getName () + ".services",
 				getClass ().getPackage ().getName () + ".controller",
+				getClass ().getPackage ().getName () + ".enumeration",
 				"org.lamisplus.modules.base.service"
 		));
 
