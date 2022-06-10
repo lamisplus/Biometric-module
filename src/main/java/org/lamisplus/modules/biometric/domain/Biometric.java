@@ -21,7 +21,7 @@ import java.time.LocalDate;
 @Setter
 @Getter
 @AllArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @Builder
 public class Biometric extends BiometricAuditEntity  implements Serializable, Persistable<String> {
 

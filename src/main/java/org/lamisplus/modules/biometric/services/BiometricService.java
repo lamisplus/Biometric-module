@@ -4,20 +4,18 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
+import org.lamisplus.modules.base.controller.apierror.IllegalTypeException;
 import org.lamisplus.modules.base.domain.entities.User;
 import org.lamisplus.modules.base.service.UserService;
 import org.lamisplus.modules.biometric.domain.Biometric;
 import org.lamisplus.modules.biometric.domain.dto.*;
-import org.lamisplus.modules.biometric.enumeration.ErrorCode;
 import org.lamisplus.modules.biometric.repository.BiometricRepository;
 import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.patient.repository.PersonRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -28,16 +26,15 @@ public class BiometricService {
     private final PersonRepository personRepository;
     private  final UserService userService;
 
-    /*@Value("org.lamisplus.biometric.application-url")
-    private String token;
-
-    @Value("org.lamisplus.biometric.application-token")
-    private String url;*/
-
-
     public BiometricDto biometricEnrollment(BiometricEnrollmentDto biometricEnrollmentDto) {
+        if(biometricEnrollmentDto.getType().equals(BiometricEnrollmentDto.Type.ERROR)){
+            //IllegalTypeException
+            throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Type is Error");
+        }
         Long personId = biometricEnrollmentDto.getPatientId ();
-        Person person = personRepository.findById (personId).orElseThrow (getEntityNotFoundExceptionSupplier (personId));
+        Person person = personRepository.findById (personId)
+                .orElseThrow(() -> new EntityNotFoundException(BiometricEnrollmentDto.class,"patientId:", String.valueOf(personId)));
+
         String biometricType = biometricEnrollmentDto.getBiometricType ();
         String deviceName = biometricEnrollmentDto.getDeviceName ();
         List<CapturedBiometricDto> capturedBiometricsList = biometricEnrollmentDto.getCapturedBiometricsList ();

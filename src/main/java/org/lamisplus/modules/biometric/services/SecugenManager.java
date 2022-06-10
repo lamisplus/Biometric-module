@@ -242,19 +242,19 @@ public class SecugenManager {
                             //biometricTemplate = mapBiometricTemplate(biometricTemplate, imageQuality, imageQuality2, regTemplate, regTemplate2, imageBuffer, imageBuffer2);
                         } else {
                             //biometricTemplate.setId("QUALITY_ERROR");
-                            biometric.getMessage().put("QUALITY_ERROR", "Quality is less than " + score[0]);
+                            biometric.getMessage().put("ERROR", "Quality is less than " + score[0]);
                             biometric.setType(BiometricEnrollmentDto.Type.ERROR);
                             return biometric;
                         }
                     } else if (iError == SGFDxErrorCode.SGFDX_ERROR_TIME_OUT) {
                         //biometricTemplate.setId("TIME_OUT");
-                        biometric.getMessage().put("TIME_OUT", "TIME_OUT");
+                        biometric.getMessage().put("ERROR", "TIME_OUT");
                         biometric.setType(BiometricEnrollmentDto.Type.ERROR);
                         return biometric;
                     } else {
-                        //biometricTemplate.setId("CAPTURE_ERROR");
-                        biometric.getMessage().put("CAPTURE_ERROR", "CAPTURE_ERROR");
+                        biometric.getMessage().put("ERROR", "CAPTURE_ERROR");
                         biometric.setType(BiometricEnrollmentDto.Type.ERROR);
+                        return biometric;
                     }
                 } else {
                     //biometricTemplate.setId("MATCH_ERROR");

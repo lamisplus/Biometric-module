@@ -10,16 +10,16 @@ import org.springframework.context.annotation.Configuration;
  * @author
  */
 @Data
-@ConfigurationProperties(prefix = "com.secugen.biometric")
+@ConfigurationProperties(prefix = "lamisplus.secugen.biometric")
 @Configuration("secugenProperties")
 public class SecugenProperties {
     
-    private String serverUrl;
+    private String serverUrl = "http://localhost:8282";
     
-    private String serverPort;
+    private String serverPort = "8282";
     
-    private Long timeout;
+    private Long timeout = 3000L;
     
-    private Long quality;
+    private Long quality = 80L;
     
 }

@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.biometric.domain.dto.BiometricEnrollmentDto;
+import org.lamisplus.modules.biometric.domain.dto.CaptureRequestDTO;
 import org.lamisplus.modules.biometric.domain.dto.DeviceDTO;
+import org.lamisplus.modules.biometric.domain.dto.ErrorCodeDTO;
 import org.lamisplus.modules.biometric.enumeration.ErrorCode;
 import org.lamisplus.modules.biometric.repository.BiometricDeviceRepository;
 import org.lamisplus.modules.biometric.services.BiometricService;
@@ -43,13 +45,16 @@ public class SecugenController {
     }
 
     @PostMapping(BASE_URL_VERSION_ONE + "/enrollment")
-    public BiometricEnrollmentDto enrollment(@RequestParam String reader, @Valid @RequestBody BiometricEnrollmentDto biometric) {
-        return secugenService.enrollment(reader, biometric);
+    public BiometricEnrollmentDto enrollment(@RequestParam String reader,
+                                             @Valid @RequestBody CaptureRequestDTO captureRequestDTO) {
+        return secugenService.enrollment(reader, captureRequestDTO);
     }
 
 
     @PostMapping(BASE_URL_VERSION_ONE + "/enrollment2")
-    public BiometricEnrollmentDto enrollment2(@RequestParam String reader, @Valid @RequestBody BiometricEnrollmentDto biometric) {
+    public BiometricEnrollmentDto enrollment2(@RequestParam String reader,
+                                              @Valid @RequestBody CaptureRequestDTO captureRequestDTO) {
+        BiometricEnrollmentDto biometric = secugenService.getBiometricEnrollmentDto(captureRequestDTO);
         biometric.setMessage(new HashMap<String, String>());
         if(!reader.equals("SG_DEV_AUTO")) {
             biometric.getMessage().put("ERROR", "READER NOT AVAILABLE");
@@ -74,7 +79,7 @@ public class SecugenController {
     }
 
     @GetMapping(BASE_URL_VERSION_ONE + "/boot")
-    public ErrorCode boot(@RequestParam String reader) {
-        return ErrorCode.getErrorCode(secugenManager.boot(secugenManager.getDeviceId(reader)));
+    public ErrorCodeDTO boot(@RequestParam String reader) {
+        return secugenService.boot(reader);
     }
 }

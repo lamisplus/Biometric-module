@@ -1,9 +1,12 @@
 package org.lamisplus.modules.biometric;
 
+import com.foreach.across.AcrossApplicationRunner;
+import com.foreach.across.config.AcrossApplication;
 import com.foreach.across.core.AcrossModule;
 import com.foreach.across.core.annotations.AcrossDepends;
 import com.foreach.across.core.context.configurer.ComponentScanConfigurer;
 import com.foreach.across.modules.hibernate.jpa.AcrossHibernateJpaModule;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 
 import java.io.File;
@@ -18,6 +21,7 @@ import java.util.ArrayList;
 		required = {
 				AcrossHibernateJpaModule.NAME
 		})
+@Slf4j
 public class BiometricModule extends AcrossModule {
 	public static final String NAME = "BiometricModule";
 	public static String modulePath = System.getProperty("user.dir");
@@ -49,30 +53,34 @@ public class BiometricModule extends AcrossModule {
 		// Use reflection
 		Method method= null;
 		try {
-			method = clazz.getDeclaredMethod("addURL", new Class[] { URL.class });
+			method = clazz.getDeclaredMethod("addURL", URL.class);
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
 		}
-		method.setAccessible(true);
+		if (method != null) {
+			method.setAccessible(true);
+		}
 
 
-		//String jarPath = modulePath+ File.separator+"java"+File.separator+"jar"+File.separator;
-		ArrayList<String> jarFileList = new ArrayList<String>();
-		jarFileList.add(modulePath+"FDxSDKPro-1.0.jar");
+		ArrayList<String> jarFileList = new ArrayList<>();
+		jarFileList.add(modulePath + File.separator + "FDxSDKPro-1.0.jar");
 		for(String jar : jarFileList){
 			File f = new File(jar);
-			if(f.exists() == false){
+			if(!f.exists()){
 				try {
 					throw new Exception("File [" + jar + "] doesn't exist!");
 				} catch (Exception e) {
+					LOG.info("File [" + jar + "] doesn't exist!");
 					e.printStackTrace();
 				}
 			}
 
 			System.out.println("Adding jar [" + jar + "]");
 			try {
-				method.invoke(classLoader, new Object[] { f.toURL() });
-			} catch (IllegalAccessException | InvocationTargetException | MalformedURLException e) {
+				if (method != null) {
+					method.invoke(classLoader, f.toURI());
+				}
+			} catch (IllegalAccessException | InvocationTargetException e) {
 				e.printStackTrace();
 			}
 		}

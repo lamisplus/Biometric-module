@@ -1,10 +1,7 @@
 package org.lamisplus.modules.biometric.services;
 
 import lombok.RequiredArgsConstructor;
-import org.lamisplus.modules.biometric.domain.dto.BiometricEnrollmentDto;
-import org.lamisplus.modules.biometric.domain.dto.BiometricStoreDTO;
-import org.lamisplus.modules.biometric.domain.dto.CapturedBiometricDto;
-import org.lamisplus.modules.biometric.domain.dto.DeviceDTO;
+import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.enumeration.ErrorCode;
 import org.springframework.stereotype.Service;
 
@@ -16,32 +13,24 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 @RequiredArgsConstructor
 public class SecugenService {
-
     private final SecugenManager secugenManager;
 
-
-    public BiometricEnrollmentDto enrollment(String reader, BiometricEnrollmentDto biometric){
-        if(biometric.getMessage() == null){
-            biometric.setMessage(new HashMap<>());
-        }
+    public BiometricEnrollmentDto enrollment(String reader, CaptureRequestDTO captureRequestDTO){
+        BiometricEnrollmentDto biometric = getBiometricEnrollmentDto(captureRequestDTO);
+        if(biometric.getMessage() == null)biometric.setMessage(new HashMap<>());
 
         if (this.scannerIsNotSet(reader)) {
-            biometric.getMessage().put("CANNOT FIND READER", "READER NOT AVAILABLE");
+            biometric.getMessage().put("ERROR", "READER NOT AVAILABLE");
             biometric.setType(BiometricEnrollmentDto.Type.ERROR);
             return biometric;
         }
         biometric.setDeviceName(reader);
         biometric.getMessage().put("STARTED CAPTURING", "PROCEEDING...");
         Long readerId = secugenManager.getDeviceId(reader);
-
         secugenManager.boot(readerId);
         if (secugenManager.getError() > 0L) {
             ErrorCode errorCode = ErrorCode.getErrorCode(secugenManager.getError());
-            if(errorCode == null) {
-                biometric.getMessage().put("ERROR", "SECUGEN ERROR");
-            } else {
-                biometric.getMessage().put("ERROR", errorCode.getErrorName() + ": " + errorCode.getErrorMessage());
-            }
+            biometric.getMessage().put("ERROR", errorCode.getErrorName() + ": " + errorCode.getErrorMessage());
             return biometric;
         }
 
@@ -58,7 +47,7 @@ public class SecugenService {
                         matched.set(secugenManager.matchTemplate(capturedBiometrics.getTemplate(), biometric.getTemplate()));
                         if (matched.get()) {
                             //log.info("Fingerprint already exist");
-                            biometric.getMessage().put("PATIENT_IDENTIFIED", "Fingerprint already captured");
+                            biometric.getMessage().put("ERROR", "Fingerprint already captured");
                             biometric.setType(BiometricEnrollmentDto.Type.ERROR);
                             biometric.setCapturedBiometricsList(BiometricStoreDTO.getPatientBiometricStore().get(biometric.getPatientId()));
                             biometric.setCapturedBiometricsList(capturedBiometricsList);
@@ -110,5 +99,24 @@ public class SecugenService {
             }
         }
         return true;
+    }
+
+    public ErrorCodeDTO boot(String reader) {
+        ErrorCode errorCode = ErrorCode.getErrorCode(secugenManager.boot(secugenManager.getDeviceId(reader)));
+        return ErrorCodeDTO.builder()
+                .errorID(errorCode.getErrorID())
+                .errorName(errorCode.getErrorName())
+                .errorMessage(errorCode.getErrorMessage())
+                .errorType(errorCode.getType())
+                .build();
+    }
+
+    public BiometricEnrollmentDto getBiometricEnrollmentDto(CaptureRequestDTO captureRequestDTO){
+        BiometricEnrollmentDto biometricEnrollmentDto = new BiometricEnrollmentDto();
+        biometricEnrollmentDto.setBiometricType(captureRequestDTO.getBiometricType());
+        biometricEnrollmentDto.setTemplateType(captureRequestDTO.getTemplateType());
+        biometricEnrollmentDto.setPatientId(captureRequestDTO.getPatientId());
+
+        return biometricEnrollmentDto;
     }
 }
