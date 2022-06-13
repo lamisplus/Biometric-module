@@ -6,9 +6,11 @@ import org.lamisplus.modules.biometric.enumeration.ErrorCode;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +19,7 @@ public class SecugenService {
 
     public BiometricEnrollmentDto enrollment(String reader, CaptureRequestDTO captureRequestDTO){
         BiometricEnrollmentDto biometric = getBiometricEnrollmentDto(captureRequestDTO);
+
         if(biometric.getMessage() == null)biometric.setMessage(new HashMap<>());
 
         if (this.scannerIsNotSet(reader)) {
@@ -26,10 +29,10 @@ public class SecugenService {
         }
         biometric.setDeviceName(reader);
         biometric.getMessage().put("STARTED CAPTURING", "PROCEEDING...");
-        Long readerId = secugenManager.getDeviceId(reader);
-        secugenManager.boot(readerId);
-        if (secugenManager.getError() > 0L) {
-            ErrorCode errorCode = ErrorCode.getErrorCode(secugenManager.getError());
+        Long error = secugenManager.boot(secugenManager.getDeviceId(reader));
+
+        if (error > 0L) {
+            ErrorCode errorCode = ErrorCode.getErrorCode(error);
             biometric.getMessage().put("ERROR", errorCode.getErrorName() + ": " + errorCode.getErrorMessage());
             return biometric;
         }
@@ -38,20 +41,22 @@ public class SecugenService {
             biometric = secugenManager.captureFingerPrint(biometric);
             AtomicReference<Boolean> matched = new AtomicReference<>(false);
             if (biometric.getTemplate().length > 200 && biometric.getImageQuality() >= 80) {
-
                 byte[] scannedTemplate = biometric.getTemplate();
                 if(biometric.getTemplate() != null && !BiometricStoreDTO.getPatientBiometricStore().isEmpty()) {
-                    final List<CapturedBiometricDto> capturedBiometricsList = BiometricStoreDTO.getPatientBiometricStore().values().stream().findFirst().get();
+                    final List<CapturedBiometricDto> capturedBiometricsListDTO = BiometricStoreDTO
+                            .getPatientBiometricStore()
+                            .values()
+                            .stream()
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toList());
 
-                    for (CapturedBiometricDto capturedBiometrics : capturedBiometricsList) {
-                        matched.set(secugenManager.matchTemplate(capturedBiometrics.getTemplate(), biometric.getTemplate()));
+                    for (CapturedBiometricDto capturedBiometricsDTO : capturedBiometricsListDTO) {
+                        matched.set(secugenManager.matchTemplate(capturedBiometricsDTO.getTemplate(),
+                                biometric.getTemplate()));
                         if (matched.get()) {
-                            //log.info("Fingerprint already exist");
-                            biometric.getMessage().put("ERROR", "Fingerprint already captured");
-                            biometric.setType(BiometricEnrollmentDto.Type.ERROR);
-                            biometric.setCapturedBiometricsList(BiometricStoreDTO.getPatientBiometricStore().get(biometric.getPatientId()));
-                            biometric.setCapturedBiometricsList(capturedBiometricsList);
-                            return biometric;
+                            //biometric.setCapturedBiometricsList(BiometricStoreDTO.getPatientBiometricStore().get(biometric.getPatientId()));
+                            biometric.setCapturedBiometricsList(capturedBiometricsListDTO);
+                            return this.addErrorMessage(biometric, "Fingerprint already captured");
                         }
                     }
                 } else {
@@ -71,21 +76,12 @@ public class SecugenService {
                 biometric.setCapturedBiometricsList(capturedBiometricsList);
                 biometric.setTemplate(scannedTemplate);
             }else {
-                biometric.getMessage().put("ERROR", "COULD_NOT_CAPTURE_TEMPLATE...");
-                biometric.setType(BiometricEnrollmentDto.Type.ERROR);
-                return biometric;
+                return this.addErrorMessage(biometric, null);
             }
 
         } catch (Exception exception) {
             exception.printStackTrace();
-            biometric.getMessage().put("ERROR", exception.getMessage());
-            biometric.getMessage().put("IMAGE QUALITY",
-                    (biometric.getImageQuality() < 80) ? "LOW - " + biometric.getImageQuality() : "OK");
-
-            biometric.getMessage().put("TEMPLATE LENGTH",
-                    (biometric.getTemplate().length < 200) ? "LOW - " + biometric.getTemplate().length : "OK");
-            biometric.setType(BiometricEnrollmentDto.Type.ERROR);
-            return biometric;
+            return this.addErrorMessage(biometric, exception.getMessage());
         }
         return biometric;
     }
@@ -117,6 +113,18 @@ public class SecugenService {
         biometricEnrollmentDto.setTemplateType(captureRequestDTO.getTemplateType());
         biometricEnrollmentDto.setPatientId(captureRequestDTO.getPatientId());
 
+        return biometricEnrollmentDto;
+    }
+
+    private BiometricEnrollmentDto addErrorMessage(BiometricEnrollmentDto biometricEnrollmentDto, String customMessage){
+        int imageQuality = biometricEnrollmentDto.getImageQuality();
+        int templateLength = biometricEnrollmentDto.getTemplate().length;
+        biometricEnrollmentDto.getMessage().put("ERROR", "ERROR WHILE CAPTURING... " +
+                "\nImage Quality: " + (imageQuality < 80 ? "Bad - " + imageQuality : "Good - " + imageQuality) +
+                "\nTemplate Length: " + (templateLength < 200 ? "Bad - " + templateLength : "Good - " + templateLength) +
+                "\n" + (customMessage != null ? customMessage : "")
+        );
+        biometricEnrollmentDto.setType(BiometricEnrollmentDto.Type.ERROR);
         return biometricEnrollmentDto;
     }
 }

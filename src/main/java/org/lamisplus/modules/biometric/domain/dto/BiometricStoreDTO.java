@@ -1,16 +1,16 @@
 package org.lamisplus.modules.biometric.domain.dto;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 
 public class BiometricStoreDTO {
     //public static List<CapturedBiometrics> capturedBiometrics;
     private static HashMap<Long, List<CapturedBiometricDto>> patientBiometricStore;
+    private static Set<byte[]> storedTemplate;
 
 
     public static HashMap<Long, List<CapturedBiometricDto>> addCapturedBiometrics(Long patientId, CapturedBiometricDto capturedBiometric){
+        storedBiometricsTemplates(capturedBiometric);
         if(patientBiometricStore == null){
             ArrayList<CapturedBiometricDto> capturedBiometrics = new ArrayList<>();
             patientBiometricStore = new HashMap<>();
@@ -31,5 +31,11 @@ public class BiometricStoreDTO {
             return new HashMap<Long, List<CapturedBiometricDto>>();
         }
         return patientBiometricStore;
+    }
+
+    public static Set storedBiometricsTemplates(CapturedBiometricDto capturedBiometric){
+        storedTemplate = storedTemplate != null && !storedTemplate.isEmpty() ? storedTemplate : new HashSet<>();
+        storedTemplate.add(capturedBiometric.getTemplate());
+        return storedTemplate;
     }
 }

@@ -155,12 +155,12 @@ public class SecugenManager {
             return 0;
         }
         Long quality = secugenProperties.getQuality();
-        int[] img_qlty = new int[1];
-        this.sgfplib.GetImageQuality(deviceInfo.imageWidth, deviceInfo.imageHeight, imageBuffer, img_qlty);
-        if (img_qlty[0] < quality) {
-            logger.info("Image quality below " + quality + ": " + img_qlty[0]);
+        int[] imageQuality = new int[1];
+        this.sgfplib.GetImageQuality(deviceInfo.imageWidth, deviceInfo.imageHeight, imageBuffer, imageQuality);
+        if (imageQuality[0] < quality) {
+            logger.info("Image quality below " + quality + ": " + imageQuality[0]);
         }
-        return img_qlty[0];
+        return imageQuality[0];
     }
 
     /**
@@ -176,13 +176,13 @@ public class SecugenManager {
         error = this.sgfplib.GetMaxTemplateSize(maxTemplateSize);
         byte[] regTemplate = new byte[maxTemplateSize[0]];
 
-        SGFingerInfo finger_info = new SGFingerInfo();
+        SGFingerInfo fingerInfo = new SGFingerInfo();
         //Finger Position/Type: SG_FINGPOS_UK -> Unknown Finger
-        finger_info.FingerNumber = this.sgFingerPositionNumber;
-        finger_info.ImageQuality = imageQuality;
-        finger_info.ImpressionType = SGImpressionType.SG_IMPTYPE_LP;
-        finger_info.ViewNumber = 1; //The number of the view. This is important if there are multiple samples of the same finger.
-        error = this.sgfplib.CreateTemplate(finger_info, imageBuffer, regTemplate);
+        fingerInfo.FingerNumber = this.sgFingerPositionNumber;
+        fingerInfo.ImageQuality = imageQuality;
+        fingerInfo.ImpressionType = SGImpressionType.SG_IMPTYPE_LP;
+        fingerInfo.ViewNumber = 1; //The number of the view. This is important if there are multiple samples of the same finger.
+        error = this.sgfplib.CreateTemplate(fingerInfo, imageBuffer, regTemplate);
         if (error == SGFDxErrorCode.SGFDX_ERROR_NONE) {
             return regTemplate;
         } else {
