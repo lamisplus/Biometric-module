@@ -1,0 +1,150 @@
+across:
+    configuration:
+        validate: false
+    web:
+        resources:
+            caching:
+acrossHibernate:
+    create-unit-of-work-factory: true
+    hibernate-properties:
+        hibernate.format_sql: true
+        hibernate.use_sql_comments: false
+        hibernate.show_sql: false
+        hibernate.event.merge.enty_copy_observer: allow
+    primary: true
+    #generate-ddl: true
+    register-repository-interceptor: true
+applicationInfo:
+    applicationId: lamisplus
+    applicationName: LAMISPLUS
+    buildDate: "@maven.build.timestamp@"
+    buildId: "@pom.version@-@build.revision@"
+
+jpa:
+    create-unit-of-work-factory: true
+    hibernate-properties:
+        hibernate.format_sql: true
+        hibernate.use_sql_comments: false
+        hibernate.show_sql: false
+        hibernate.event.merge.enty_copy_observer: allow
+    primary: true
+build:
+    number: "@build.revision@"
+logging:
+    request-response:
+        enabled: true
+
+    file:
+        name: application-debug.log
+server:
+    error:
+        whitelabel:
+            enabled: false
+        include-stacktrace:
+            facility: false
+    datasource:
+        hikari:
+            auto-commit: false
+            data-source-properties:
+                cachePrepStmts: true
+                prepStmtCacheSize: 250
+                prepStmtCacheSqlLimit: 2048
+                useServerPrepStmts: true
+    compression:
+        enabled: true
+        mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    http2:
+        enabled: true
+    port: 8282
+    tomcat:
+        uri-encoding: UTF-8
+        connection-timeout: 20s
+spring:
+    datasource:
+        driver-class-name: org.postgresql.Driver
+        username: postgres
+        password: emeka
+        url: jdbc:postgresql://localhost:5432/core
+        hibernate:
+            ddl-auto: none
+            event.merge.enty_copy_observer: allow
+        hikari:
+            auto-commit: true
+            data-source-properties:
+                cachePrepStmts: true
+                prepStmtCacheSize: 250
+                prepStmtCacheSqlLimit: 2048
+                useServerPrepStmts: true
+            maximum-pool-size: 20
+            minimum-idle: 5
+    jpa:
+        database: POSTGRESQL
+        show-sql: true
+        open-in-view: false
+        properties:
+            hibernate.enable_lazy_load_no_trans: true
+    mail:
+        host: localhost
+        port: 25
+        username:
+        password:
+        jndi-name:
+    servlet:
+        multipart:
+            max-file-size: 1000MB
+            max-request-size: 1000MB
+    jackson:
+        jackson:
+            serialization:
+                fail-on-empty-beans: false
+    banner:
+        location: banner.txt
+jwt:
+    # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
+    base64-secret: YzMzNjBmOTcwN2Y4YmNmNWViMzhhNjk5MjhmMmY5OTZkNWUxYzIwM2Q5ZWU4OWIzNTZmZTBlOTMzZjFhN2ZmMzBlMDIzMGRkYWNkYTIwOThmY2E1ZjNhYTAxODA0NTJkY2U5NTYxZTI1YjA1NTIyN2IwMTZlMTRlMDM0OTIyNzM=
+    # Token is valid 12 hours
+    token-validity-in-milli-seconds: 43200000
+    token-validity-in-milli-seconds-for-remember-me: 43200000
+lamis:
+    temp-dir: runtime/
+    module-path: modules
+
+management:
+    endpoints:
+        web:
+            base-path: /api/management
+            exposure:
+                include: ["configprops", "env", "health", 'metrics', "info", "threaddump", "loggers" ]
+        enabled-by-default: true
+    endpoint:
+        metrics:
+            enabled: true
+        health:
+            show-details: always
+springdoc:
+    show:
+        actuator=true:
+application:
+    async:
+        core-pool-size: 10
+        max-pool-size: 50
+        queue-capacity: 10000
+
+lamisplus:
+    datasource:
+        module:
+            driver-class-name: org.postgresql.Driver
+            username: postgres
+            password: emeka
+            url: jdbc:postgresql://localhost:5432/core
+            hikari:
+                    auto-commit: true
+                    data-source-properties:
+                        cachePrepStmts: true
+                        prepStmtCacheSize: 250
+                        prepStmtCacheSqlLimit: 2048
+                        useServerPrepStmts: true
+                    maximum-pool-size: 5
+                    minimum-idle: 3
+    base-url:
+        version-one: "/api/v1/"

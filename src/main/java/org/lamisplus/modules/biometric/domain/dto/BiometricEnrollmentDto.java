@@ -12,8 +12,6 @@ import java.util.List;
 public class BiometricEnrollmentDto implements Serializable {
     @NotNull(message = "patientId is mandatory")
     private Long patientId;
-    @NotNull(message = "completed is mandatory")
-    Boolean completed;
     private HashMap<String, String> message;
     private byte[] template;
     private List<CapturedBiometricDto> capturedBiometricsList;

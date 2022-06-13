@@ -210,6 +210,12 @@
 			<groupId>com.foreach.across.modules</groupId>
 			<artifactId>across-hibernate-module</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>secugen</groupId>
+			<artifactId>FDxSDKPro</artifactId>
+			<version>1.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
