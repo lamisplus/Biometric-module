@@ -2,7 +2,6 @@ package org.lamisplus.modules.biometric.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.base.controller.apierror.IllegalTypeException;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +36,7 @@ public class BiometricService {
         }
         Long personId = biometricEnrollmentDto.getPatientId ();
         Person person = personRepository.findById (personId)
-                .orElseThrow(() -> new EntityNotFoundException(BiometricEnrollmentDto.class,"patientId:", String.valueOf(personId)));
+                .orElseThrow(() -> new EntityNotFoundException(BiometricEnrollmentDto.class,"patientId:", ""+personId));
 
         String biometricType = biometricEnrollmentDto.getBiometricType ();
         String deviceName = biometricEnrollmentDto.getDeviceName ();
@@ -73,10 +71,6 @@ public class BiometricService {
         capturedBiometricDtos.getCapturedBiometricsList().add(capturedBiometricDto);
 
         return capturedBiometricDtos;
-    }
-    @NotNull
-    private Supplier<EntityNotFoundException> getEntityNotFoundExceptionSupplier(Long personId) {
-        return () -> new EntityNotFoundException (BiometricService.class, "Person not found with given Id " + personId);
     }
     private BiometricDto getBiometricDto(List<Biometric> biometricList, Long personId) {
         return BiometricDto.builder ()
