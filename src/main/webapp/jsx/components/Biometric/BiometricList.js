@@ -100,7 +100,8 @@ const BiometricList = (props) => {
                     setLoading(false)
                     setBiometricList(response.data);                   
                 })
-                .catch((error) => {    
+                .catch((error) => {  
+                    setLoading(false)  
                 });        
         }
 

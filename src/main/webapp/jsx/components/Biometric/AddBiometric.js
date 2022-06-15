@@ -53,7 +53,7 @@ const AddBiometricDevice = (props) => {
     //Method to update module menu
     const AddDevice = e => {
         e.preventDefault()
-
+        if(validate()){
             axios
             .post(`${baseUrl}biometrics/device`,details,
             { headers: {"Authorization" : `Bearer ${token}`} }
@@ -65,7 +65,8 @@ const AddBiometricDevice = (props) => {
             })
             .catch((error) => { 
                 toast.error("Something went wrong. Please try again...")   
-            });  
+            });
+        }  
     }
 
     return (
@@ -125,17 +126,18 @@ const AddBiometricDevice = (props) => {
                                                 <label>Status</label>
                                                 
                                                 <select
-                                                defaultValue={"true"}
+                                                //defaultValue={"true"}
                                                 name="active"
                                                 id="active"
                                                 className="form-control wide"
                                                 onChange={handleOtherFieldInputChange}
-                                                >                                   
+                                                >  
+                                                <option value=""> Select</option>                                 
                                                 <option value="true"> Active</option>
                                                 <option value="false">Not Active </option>
                                                 </select>
-                                                {errors.status !=="" ? (
-                                                    <span className={classes.error}>{errors.status}</span>
+                                                {errors.active !=="" ? (
+                                                    <span className={classes.error}>{errors.active}</span>
                                                 ) : "" } 
                                             </div>
 
