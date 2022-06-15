@@ -135,6 +135,7 @@ const BiometricList = (props) => {
     return (
         <div>
             <ToastContainer autoClose={3000} hideProgressBar />
+            <br/><br/>
             <PageTitle activeMenu="Biometric List" motherMenu="Biometric Setup " />
 
             <Card className={classes.cardBottom}>
