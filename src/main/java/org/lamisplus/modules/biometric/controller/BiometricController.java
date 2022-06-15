@@ -21,7 +21,6 @@ public class BiometricController {
     private final BiometricDeviceRepository biometricDeviceRepository;
     //Versioning through URI Path
     private final String BASE_URL_VERSION_ONE = "/api/v1/biometrics";
-
     @PostMapping(BASE_URL_VERSION_ONE + "/templates")
     public ResponseEntity<BiometricDto> saveBiometric(@RequestBody BiometricEnrollmentDto biometrics) {
         return ResponseEntity.ok (biometricService.biometricEnrollment (biometrics));
@@ -30,22 +29,18 @@ public class BiometricController {
     public ResponseEntity<CapturedBiometricDTOS> findByPatient(@PathVariable Long id) {
         return ResponseEntity.ok (biometricService.getByPersonId (id));
     }
-
     @PostMapping(BASE_URL_VERSION_ONE + "/device")
     public ResponseEntity<BiometricDevice> saveBiometric(@RequestBody BiometricDevice biometricDevice) {
         return ResponseEntity.ok (biometricDeviceRepository.save (biometricDevice));
     }
-
     @PutMapping(BASE_URL_VERSION_ONE + "/device/{id}")
     public ResponseEntity<BiometricDevice> update(@PathVariable Long id, @RequestBody BiometricDevice biometricDevice) {
         return ResponseEntity.ok (biometricService.update (id, biometricDevice));
     }
-
     @DeleteMapping(BASE_URL_VERSION_ONE + "/device/{id}")
     public void delete(@PathVariable Long id) {
         biometricService.delete (id);
     }
-
     @GetMapping(BASE_URL_VERSION_ONE + "/devices")
     public ResponseEntity<List<BiometricDevice>> getActiveBiometricDevice() {
         return ResponseEntity.ok (biometricDeviceRepository.findAll());
