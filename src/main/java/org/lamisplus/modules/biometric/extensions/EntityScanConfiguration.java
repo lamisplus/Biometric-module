@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 @ModuleConfiguration({"AcrossHibernateJpaModule"})
 @Configuration
 public class EntityScanConfiguration implements HibernatePackageConfigurer {
-
     @Override
     public void configureHibernatePackage(HibernatePackageRegistry hibernatePackage) {
         hibernatePackage.addPackageToScan (BiometricDomain.class, PatientDomain.class);

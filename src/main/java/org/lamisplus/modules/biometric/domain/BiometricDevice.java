@@ -3,6 +3,7 @@ package org.lamisplus.modules.biometric.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "biometric_device")
@@ -17,6 +18,8 @@ public class BiometricDevice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
+
+    @NotBlank
     private String name;
     private String url;
     private Boolean active = true;

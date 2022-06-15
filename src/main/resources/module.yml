@@ -1,12 +1,12 @@
 basePackage: org.lamisplus.modules.biometric
 name: BiometricModule
 store: true
-menus:
-  - icon:
-    disabled: false
-    name: biometric
-    state: biometric
-    url: /across/resources/static/biometric/index.html
+#menus:
+#  - icon:
+#    disabled: false
+#    name: biometric
+#    state: biometric
+#    url: /across/resources/static/biometric/index.html
 umdLocation: /across/resources/static/biometric/index.html
 webModules:
   - breadcrumb: BIOMETRIC
