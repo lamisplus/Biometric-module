@@ -25,7 +25,7 @@ export default function App() {
           <Route path="/">
             <BiometricList />
           </Route>
-                 
+                          
         </Switch>
       </div>
  
