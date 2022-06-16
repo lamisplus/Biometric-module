@@ -120,7 +120,7 @@ const BiometricList = (props) => {
             { headers: {"Authorization" : `Bearer ${token}`} }
             )
             .then((response) => { 
-                props.loadBiometricDevices()               
+                loadBiometricDevices()               
                 toast.success("Biometric Device Deleted Successfully!")
                 setModal(false)                  
             })

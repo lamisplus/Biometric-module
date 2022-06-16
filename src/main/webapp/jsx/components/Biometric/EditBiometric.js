@@ -61,8 +61,7 @@ const EditBiometricDevice = (props) => {
             .put(`${baseUrl}biometrics/device/${details.id}`,details,
             { headers: {"Authorization" : `Bearer ${token}`} }
             )
-            .then((response) => { 
-               
+            .then((response) => {                
                 props.loadBiometricDevices()               
                 toast.success("Biometric Device Updated Successfully!")
                 props.togglestatus()                  
