@@ -8,6 +8,7 @@ import org.lamisplus.modules.biometric.domain.dto.BiometricEnrollmentDto;
 import org.lamisplus.modules.biometric.domain.dto.CapturedBiometricDTOS;
 import org.lamisplus.modules.biometric.repository.BiometricDeviceRepository;
 import org.lamisplus.modules.biometric.services.BiometricService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,11 +39,13 @@ public class BiometricController {
         return ResponseEntity.ok (biometricService.update (id, biometricDevice));
     }
     @DeleteMapping(BASE_URL_VERSION_ONE + "/device/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         biometricService.delete (id);
     }
     @GetMapping(BASE_URL_VERSION_ONE + "/devices")
-    public ResponseEntity<List<BiometricDevice>> getActiveBiometricDevice() {
-        return ResponseEntity.ok (biometricDeviceRepository.findAll());
+    public ResponseEntity<List<BiometricDevice>> getAllBiometricDevice(@RequestParam (required = false,
+            defaultValue = "false") boolean active) {
+        return ResponseEntity.ok (biometricService.getAllBiometricDevices(active));
     }
 }

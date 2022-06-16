@@ -118,6 +118,12 @@ public class BiometricService {
                 .findById(id)
                 .orElseThrow(()-> new EntityNotFoundException(BiometricDevice.class, "id", ""+id));
         biometricDeviceRepository.delete(biometricDevice);
+    }
 
+    public List<BiometricDevice> getAllBiometricDevices(boolean active){
+        if(active){
+            return biometricDeviceRepository.getAllByActiveIsTrue();
+        }
+        return biometricDeviceRepository.findAll();
     }
 }
