@@ -4,7 +4,7 @@ store: true
 menus:
   - icon:
     disabled: false
-    name: biometric
+    name: Biometric Setup
     state: biometric
     url: /across/resources/static/biometric/index.html
 umdLocation: /across/resources/static/biometric/index.html

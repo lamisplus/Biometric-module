@@ -37,28 +37,21 @@ public enum ErrorCode {
     SGFDX_ERROR_MATCH_FAIL(SGFDxErrorCode.SGFDX_ERROR_MATCH_FAIL, "SGFDX_ERROR_MATCH_FAIL", "Matching failed", Type.ERROR),
     SGFDX_ERROR_JNI_DLLLOAD_FAILED(SGFDxErrorCode.SGFDX_ERROR_JNI_DLLLOAD_FAILED, "SGFDX_ERROR_JNI_DLLLOAD_FAILED", "An error occurred while loading JSGFPLIB.DLL JNI Wrapper", Type.ERROR),
     SGFDX_ERROR_NOT_AVAILABLE(987654321L, "SGFDX_ERROR_NOT_AVAILABLE", " Device not reachable", Type.ERROR);
-
     @Getter
     private final Long errorID;
-
     @Getter
     private final String errorName;
-
     @Getter
     private final String errorMessage;
-
     public enum Type {ERROR, SUCCESS}
     @Getter
     private final Type type;
-
     ErrorCode(Long errorID, String errorName, String errorMessage, Type type) {
         this.errorID = errorID;
         this.errorName = errorName;
         this.errorMessage = errorMessage;
         this.type = type;
-    }   
-
-    
+    }
     public static ErrorCode getErrorCode(Long errorID){
         for(ErrorCode errorCode : ErrorCode.values()){
             if (errorCode.getErrorID() == errorID){

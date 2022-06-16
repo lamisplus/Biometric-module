@@ -7,7 +7,7 @@
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
-
+node_modules/
 # Package Files #
 *.jar
 *.war
@@ -21,6 +21,7 @@ hs_err_pid*
 
 ### Custom ignores
 target
+build
 .idea
 *.iml
 db

@@ -36,6 +36,10 @@ public class SecugenService {
             biometric.getMessage().put("ERROR", errorCode.getErrorName() + ": " + errorCode.getErrorMessage());
             return biometric;
         }
+        captureRequestDTO.getCapturedBiometricsList().forEach(capturedBiometricDto -> {
+            BiometricStoreDTO.addCapturedBiometrics(captureRequestDTO.getPatientId(), capturedBiometricDto);
+        });
+
 
         try {
             biometric = secugenManager.captureFingerPrint(biometric);
