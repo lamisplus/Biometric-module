@@ -1,17 +1,16 @@
-import React, { useState}   from 'react';
+import React, { useState, useEffect}   from 'react';
 import {
  Spinner
 } from 'reactstrap';
 import MatButton from '@material-ui/core/Button';
 import {Modal, Button} from 'react-bootstrap';
 import axios from "axios";
-import {url as baseUrl} from "../../../api";
 //import EditIcon from "@material-ui/icons/EditIcon";
 import {makeStyles} from "@material-ui/core/styles";
 import {toast} from "react-toastify";
 import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
-
+import { token as token, url as baseUrl } from "./../../../api";
 
 const useStyles = makeStyles(theme => ({
     button: {
@@ -23,16 +22,16 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-const AddBiometricDevice = (props) => {
+const EditBiometricDevice = (props) => {
     const classes = useStyles()
     const [loading, setLoading] = useState(false)
     const datasample = props.datasample ? props.datasample : {};
     const [errors, setErrors] = useState({});
-    const deviceItems = { type: "", name:"", url:"", }
-    const [details, setDetails] = useState(deviceItems);
-
-
-
+    const [details, setDetails] =  useState(props.datasample )
+    useEffect(() => {
+        setDetails(props.datasample)
+    }, [props.datasample]);
+    console.log(details)
     const handleOtherFieldInputChange = e => {
         setDetails ({ ...details, [e.target.name]: e.target.value });
     }
@@ -41,7 +40,7 @@ const AddBiometricDevice = (props) => {
         //temp.parentId = details.parentId!=="" ? "" : "This field is required"
         temp.url = details.url ? "" : "This field is required"
         temp.name = details.name ? "" : "This field is required"
-        temp.type = details.type ? "" : "This field is required"
+        temp.active = details.active ? "" : "This field is required"
         setErrors({
             ...temp
         })
@@ -52,31 +51,26 @@ const AddBiometricDevice = (props) => {
     const closeModal = ()=>{
         //resetForm()
         props.togglestatus()
-        //setDetails(defaultDetailValues)
-        //setErrors({})
     }
 
     //Method to update module menu
     const AddDevice = e => {
         e.preventDefault()
-
         if(validate()){
-            details["moduleId"] = datasample.id
-
-            setLoading(true);
-            const onSuccess = () => {
-                props.loadModuleMenus()
-                props.togglestatus()
-                setLoading(false)
-            }
-            const onError = () => {
-                setLoading(false)
-            }
-            props.addMenu(details, onSuccess, onError);
-            return
-
-        }
-
+            axios
+            .put(`${baseUrl}biometrics/device/${details.id}`,details,
+            { headers: {"Authorization" : `Bearer ${token}`} }
+            )
+            .then((response) => { 
+               
+                props.loadBiometricDevices()               
+                toast.success("Biometric Device Updated Successfully!")
+                props.togglestatus()                  
+            })
+            .catch((error) => { 
+                toast.error("Something went wrong. Please try again...")   
+            });
+        }  
     }
 
     return (
@@ -127,23 +121,28 @@ const AddBiometricDevice = (props) => {
                                                     onChange={handleOtherFieldInputChange}
                                                     required
                                                 />
+                                                
                                                  {errors.url !=="" ? (
                                                     <span className={classes.error}>{errors.url}</span>
                                                 ) : "" }
                                             </div>
                                             <div className="form-group col-md-12">
-                                                <label>Device type</label>
-                                                <input
-                                                    type="text"
-                                                    name="type"
-                                                    id="type"
-                                                    className="form-control"
-                                                    value={details.type}
-                                                    onChange={handleOtherFieldInputChange}
-                                                />
-                                                {errors.type !=="" ? (
-                                                    <span className={classes.error}>{errors.type}</span>
-                                                ) : "" }
+                                                <label>Status</label>
+                                                
+                                                <select
+                                                defaultValue={"true"}
+                                                name="active"
+                                                id="active"
+                                                className="form-control wide"
+                                                onChange={handleOtherFieldInputChange}
+                                                >  
+                                                <option value=""> Select</option>                                 
+                                                <option value="true"> Active</option>
+                                                <option value="false">Not Active </option>
+                                                </select>
+                                                {errors.active !=="" ? (
+                                                    <span className={classes.error}>{errors.active}</span>
+                                                ) : "" } 
                                             </div>
 
                                             {/*Second Row of the Field by Col */}
@@ -160,7 +159,7 @@ const AddBiometricDevice = (props) => {
 
                                         >
 
-                                            <span style={{textTransform: 'capitalize'}}>Update  {loading ? <Spinner /> : ""}</span>
+                                            <span style={{textTransform: 'capitalize'}}>Save  {loading ? <Spinner /> : ""}</span>
                                         </MatButton>
                                         <MatButton
                                             variant='contained'
@@ -182,4 +181,4 @@ const AddBiometricDevice = (props) => {
 }
 
 
-export default AddBiometricDevice;
+export default EditBiometricDevice;

@@ -72,8 +72,8 @@ const useStyles = makeStyles((theme) => ({
         alignItems: "center",
     },
 }));
-
-
+//Device NAme and ID for delete 
+let deviceName=""
 
 const BiometricList = (props) => {
     let history = useHistory();
@@ -86,6 +86,7 @@ const BiometricList = (props) => {
     const togglesetEditDeviceModal = () => setEditDeviceModal(!editDeviceModal)
     const [loading, setLoading] = useState(true);
     const [modal, setModal] = useState(false);
+    const [deviceId, setdeviceId] = useState("");
 
     useEffect(() => {
         loadBiometricDevices()
@@ -105,24 +106,29 @@ const BiometricList = (props) => {
                 });        
         }
 
-    const deleteModal = (id, name) => {
-        // menuId = id;
-        // menuName= name
+    const deleteModal = (row) => {
+        setdeviceId(row.id);
+        deviceName= row.name
+        
         setModal(!modal);
-
+        
+    };
+    // Delete Function
+    const onDelete = () => {
+        axios
+            .delete(`${baseUrl}biometrics/device/${deviceId}`,
+            { headers: {"Authorization" : `Bearer ${token}`} }
+            )
+            .then((response) => { 
+                props.loadBiometricDevices()               
+                toast.success("Biometric Device Deleted Successfully!")
+                setModal(false)                  
+            })
+            .catch((error) => { 
+                toast.error("Something went wrong. Please try again...")   
+            });
     };
 
-    const onDelete = (id) => {
-        const onSuccess = () => {
-            setModal(false)
-            //loadModuleMenus()
-        };
-        const onError = () => {
-            toast.error("Something went wrong");
-            //return;
-        };
-        //props.deleteModuleMenu(id, onSuccess,onError);
-    };
     const loadNewDeviceModal = (row) => {
         setAddNewDeviceModal(!addNewDeviceModal)
     }
@@ -180,7 +186,7 @@ const BiometricList = (props) => {
                                 <Icon name='pencil' /> Edit
                             </Label>
 
-                            <Label as='a' color='red' onClick={() =>  deleteModal(row.id, row.name)}  size='mini'>
+                            <Label as='a' color='red' onClick={() =>  deleteModal(row)}  size='mini'>
                                 <Icon name='trash' /> Delete
                             </Label>
 
@@ -218,7 +224,7 @@ const BiometricList = (props) => {
                     </Button>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>Are you sure you want to delete Device   <b>{""}</b></p>
+                    <p>Are you sure you want to delete Device   <b>{deviceName}</b></p>
                     <br/>
                     <MatButton
                         type="submit"
@@ -245,7 +251,7 @@ const BiometricList = (props) => {
 
             </Modal>
             <AddBiometricDevice modalstatus={addNewDeviceModal} togglestatus={togglesetAddNewDeviceModal}  loadBiometricDevices={loadBiometricDevices} />
-            <EditBiometric modalstatus={editDeviceModal} togglestatus={togglesetEditDeviceModal} datasample={collectModal}  />
+            <EditBiometric modalstatus={editDeviceModal} togglestatus={togglesetEditDeviceModal} datasample={collectModal}  loadBiometricDevices={loadBiometricDevices}/>
         </div>
     );
 };
