@@ -1,6 +1,7 @@
 basePackage: org.lamisplus.modules.biometric
 name: BiometricModule
 store: true
+dependencies: {PatientModule: 1.0.0}
 menus:
   - icon:
     disabled: false
@@ -13,3 +14,16 @@ webModules:
     name: BiometricModule
     path: biometric
     position: 99
+permissions:
+  - name: biometric_capture
+    description: Capture biometric
+    moduleName: BiometricModule
+  - name: biometric_add_device
+    description: Add biometric devices
+    moduleName: BiometricModule
+  - name: biometric_delete_device
+    description: Delete biometric device
+    moduleName: BiometricModule
+  - name: biometric_update_device
+    description: Update biometric devices
+    moduleName: BiometricModule
