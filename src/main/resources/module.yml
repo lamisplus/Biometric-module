@@ -17,13 +17,9 @@ webModules:
 permissions:
   - name: biometric_capture
     description: Capture biometric
-    moduleName: BiometricModule
   - name: biometric_add_device
     description: Add biometric devices
-    moduleName: BiometricModule
   - name: biometric_delete_device
     description: Delete biometric device
-    moduleName: BiometricModule
   - name: biometric_update_device
     description: Update biometric devices
-    moduleName: BiometricModule
