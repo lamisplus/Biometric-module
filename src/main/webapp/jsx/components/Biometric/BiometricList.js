@@ -87,24 +87,40 @@ const BiometricList = (props) => {
     const [loading, setLoading] = useState(true);
     const [modal, setModal] = useState(false);
     const [deviceId, setdeviceId] = useState("");
+    const [permissions, setPermissions] = useState([]);
 
     useEffect(() => {
-        loadBiometricDevices()
+        loadBiometricDevices();
+        userPermission(); 
     }, []); //componentDidMount to get module menus
    // Method to load Biometric devices
-        async function loadBiometricDevices() {
-            axios
-                .get(`${baseUrl}biometrics/devices`,
-                { headers: {"Authorization" : `Bearer ${token}`} }
-                )
-                .then((response) => {
-                    setLoading(false)
-                    setBiometricList(response.data);                   
-                })
-                .catch((error) => {  
-                    setLoading(false)  
-                });        
-        }
+    async function loadBiometricDevices() {
+        axios
+            .get(`${baseUrl}biometrics/devices`,
+            { headers: {"Authorization" : `Bearer ${token}`} }
+            )
+            .then((response) => {
+                setLoading(false)
+                setBiometricList(response.data);                   
+            })
+            .catch((error) => {  
+                setLoading(false)  
+            });        
+    }
+    //Get list of Permissions
+    const userPermission =()=>{
+        axios
+           .get(`${baseUrl}account`,
+               { headers: {"Authorization" : `Bearer ${token}`} }
+           )
+           .then((response) => {
+                setPermissions(response.data.permissions);
+      
+           })
+           .catch((error) => {
+           });
+       
+     }
 
     const deleteModal = (row) => {
         setdeviceId(row.id);
@@ -146,6 +162,7 @@ const BiometricList = (props) => {
 
             <Card className={classes.cardBottom}>
                 <CardContent>
+                {permissions.includes('biometric_add_device') || permissions.includes("all_permission") ? (
                         <MatButton
                             variant="contained"
                             color="primary"
@@ -157,7 +174,8 @@ const BiometricList = (props) => {
                             &nbsp;&nbsp;
                             <span style={{ textTransform: "lowercase" }}> Device</span>
                         </MatButton>
-
+                     ):""
+                }
                     <br />
 
                     <br />
@@ -181,15 +199,18 @@ const BiometricList = (props) => {
 
                     actions: (
                         <div>
-                           
+                           {permissions.includes('biometric_update_device') || permissions.includes("all_permission") ? (
                             <Label as='a' color='blue' className="ms-1" size='mini' onClick={() =>  editDevice(row)}>
                                 <Icon name='pencil' /> Edit
                             </Label>
-
+                            ):""
+                            }
+                            {permissions.includes('biometric_delete_device') || permissions.includes("all_permission") ? (
                             <Label as='a' color='red' onClick={() =>  deleteModal(row)}  size='mini'>
                                 <Icon name='trash' /> Delete
                             </Label>
-
+                            ):""
+                            }
 
                         </div>
                     ),
