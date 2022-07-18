@@ -27,3 +27,4 @@ build
 db
 .DS_Store
 local-data
+src/main/resources/views/static/biometric/*
