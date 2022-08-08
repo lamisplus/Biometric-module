@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.enumeration.ErrorCode;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,12 +15,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SecugenService {
     private final SecugenManager secugenManager;
-
-    public BiometricEnrollmentDto enrollment(String reader, CaptureRequestDTO captureRequestDTO){
+    public BiometricEnrollmentDto enrollment(String reader, Boolean isNew, CaptureRequestDTO captureRequestDTO){
+        if(isNew){
+            this.emptyStoreByPersonId(captureRequestDTO.getPatientId());
+        }
         BiometricEnrollmentDto biometric = getBiometricEnrollmentDto(captureRequestDTO);
-
         if(biometric.getMessage() == null)biometric.setMessage(new HashMap<>());
-
         if (this.scannerIsNotSet(reader)) {
             biometric.getMessage().put("ERROR", "READER NOT AVAILABLE");
             biometric.setType(BiometricEnrollmentDto.Type.ERROR);
@@ -30,7 +29,6 @@ public class SecugenService {
         biometric.setDeviceName(reader);
         biometric.getMessage().put("STARTED CAPTURING", "PROCEEDING...");
         Long error = secugenManager.boot(secugenManager.getDeviceId(reader));
-
         if (error > 0L) {
             ErrorCode errorCode = ErrorCode.getErrorCode(error);
             biometric.getMessage().put("ERROR", errorCode.getErrorName() + ": " + errorCode.getErrorMessage());
@@ -39,8 +37,6 @@ public class SecugenService {
         captureRequestDTO.getCapturedBiometricsList().forEach(capturedBiometricDto -> {
             BiometricStoreDTO.addCapturedBiometrics(captureRequestDTO.getPatientId(), capturedBiometricDto);
         });
-
-
         try {
             biometric = secugenManager.captureFingerPrint(biometric);
             AtomicReference<Boolean> matched = new AtomicReference<>(false);
@@ -66,7 +62,6 @@ public class SecugenService {
                 } else {
                     biometric.setCapturedBiometricsList(new ArrayList<>());
                 }
-
                 biometric.getMessage().put("REGISTRATION", "PROCEEDING...");
                 biometric.setType(BiometricEnrollmentDto.Type.SUCCESS);
                 CapturedBiometricDto capturedBiometrics = new CapturedBiometricDto();
@@ -89,7 +84,6 @@ public class SecugenService {
         }
         return biometric;
     }
-
     private boolean scannerIsNotSet(String reader) {
         Long readerId = secugenManager.getDeviceId(reader);
         for (DeviceDTO deviceDTO : secugenManager.getDevices()) {
@@ -100,7 +94,6 @@ public class SecugenService {
         }
         return true;
     }
-
     public ErrorCodeDTO boot(String reader) {
         ErrorCode errorCode = ErrorCode.getErrorCode(secugenManager.boot(secugenManager.getDeviceId(reader)));
         return ErrorCodeDTO.builder()
@@ -110,16 +103,13 @@ public class SecugenService {
                 .errorType(errorCode.getType())
                 .build();
     }
-
     public BiometricEnrollmentDto getBiometricEnrollmentDto(CaptureRequestDTO captureRequestDTO){
         BiometricEnrollmentDto biometricEnrollmentDto = new BiometricEnrollmentDto();
         biometricEnrollmentDto.setBiometricType(captureRequestDTO.getBiometricType());
         biometricEnrollmentDto.setTemplateType(captureRequestDTO.getTemplateType());
         biometricEnrollmentDto.setPatientId(captureRequestDTO.getPatientId());
-
         return biometricEnrollmentDto;
     }
-
     private BiometricEnrollmentDto addErrorMessage(BiometricEnrollmentDto biometricEnrollmentDto, String customMessage){
         int imageQuality = biometricEnrollmentDto.getImageQuality();
         int templateLength = biometricEnrollmentDto.getTemplate().length;
@@ -130,5 +120,13 @@ public class SecugenService {
         );
         biometricEnrollmentDto.setType(BiometricEnrollmentDto.Type.ERROR);
         return biometricEnrollmentDto;
+    }
+    public Boolean emptyStoreByPersonId(Long personId){
+        Boolean hasCleared = false;
+        if(!BiometricStoreDTO.getPatientBiometricStore().isEmpty() && BiometricStoreDTO.getPatientBiometricStore().get(personId) != null){
+            BiometricStoreDTO.getPatientBiometricStore().remove(personId);
+            hasCleared = true;
+        }
+        return hasCleared;
     }
 }

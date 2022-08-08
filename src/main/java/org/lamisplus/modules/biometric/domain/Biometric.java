@@ -15,7 +15,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "biometric")
-@SQLDelete(sql = "update biometric set archived = 1 where id = ?", check = ResultCheckStyle.COUNT)
+@SQLDelete(sql = "delete from biometric where id = ?", check = ResultCheckStyle.COUNT)
 @Where(clause = "archived = 0")
 @NoArgsConstructor
 @Setter

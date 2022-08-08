@@ -46,8 +46,9 @@ public class SecugenController {
 
     @PostMapping(BASE_URL_VERSION_ONE + "/enrollment")
     public BiometricEnrollmentDto enrollment(@RequestParam String reader,
+                                             @RequestParam(required = false, defaultValue = "false") Boolean isNew,
                                              @Valid @RequestBody CaptureRequestDTO captureRequestDTO) {
-        return secugenService.enrollment(reader, captureRequestDTO);
+        return secugenService.enrollment(reader, isNew, captureRequestDTO);
     }
 
 

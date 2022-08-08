@@ -28,7 +28,7 @@ public class BiometricStoreDTO {
 
     public static HashMap<Long, List<CapturedBiometricDto>> getPatientBiometricStore(){
         if(patientBiometricStore == null){
-            return new HashMap<Long, List<CapturedBiometricDto>>();
+            return new HashMap<>();
         }
         return patientBiometricStore;
     }
