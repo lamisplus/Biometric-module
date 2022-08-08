@@ -46,12 +46,13 @@ public class SecugenController {
 
     @PostMapping(BASE_URL_VERSION_ONE + "/enrollment")
     public BiometricEnrollmentDto enrollment(@RequestParam String reader,
+                                             @RequestParam(required = false, defaultValue = "false") Boolean isNew,
                                              @Valid @RequestBody CaptureRequestDTO captureRequestDTO) {
-        return secugenService.enrollment(reader, captureRequestDTO);
+        return secugenService.enrollment(reader, isNew, captureRequestDTO);
     }
 
 
-    @PostMapping(BASE_URL_VERSION_ONE + "/enrollment2")
+    /*@PostMapping(BASE_URL_VERSION_ONE + "/enrollment2")
     public BiometricEnrollmentDto enrollment2(@RequestParam String reader,
                                               @Valid @RequestBody CaptureRequestDTO captureRequestDTO) {
         BiometricEnrollmentDto biometric = secugenService.getBiometricEnrollmentDto(captureRequestDTO);
@@ -76,7 +77,7 @@ public class SecugenController {
         catch(Exception e){
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
     @GetMapping(BASE_URL_VERSION_ONE + "/boot")
     public ErrorCodeDTO boot(@RequestParam String reader) {
