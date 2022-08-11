@@ -238,20 +238,15 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
+				<version>3.8.1</version>
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>${lombok.version}</version>
-						</path>
-						<path>
-							<groupId>org.mapstruct</groupId>
-							<artifactId>mapstruct-processor</artifactId>
-							<version>${mapstruct.version}</version>
+							<version>1.18.4</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
@@ -262,28 +257,28 @@
 				<version>1.12.1</version>
 				<executions>
 					<execution>
-						<id>install node and yarn</id>
+						<id>install node and npm</id>
 						<goals>
-							<goal>install-node-and-yarn</goal>
+							<goal>install-node-and-npm</goal>
 						</goals>
 						<configuration>
 							<nodeVersion>v16.13.2</nodeVersion>
-							<yarnVersion>v1.22.17</yarnVersion>
+							<npmVersion>8.1.2</npmVersion>
 						</configuration>
 					</execution>
 					<execution>
-						<id>yarn install</id>
+						<id>npm install</id>
 						<goals>
-							<goal>yarn</goal>
+							<goal>npm</goal>
 						</goals>
 						<configuration>
 							<arguments>install</arguments>
 						</configuration>
 					</execution>
 					<execution>
-						<id>yarn run build</id>
+						<id>npm run build</id>
 						<goals>
-							<goal>yarn</goal>
+							<goal>npm</goal>
 						</goals>
 						<configuration>
 							<arguments>run build</arguments>
