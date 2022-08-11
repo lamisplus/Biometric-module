@@ -7,6 +7,11 @@
     <property name="autoIncrement" value="true"/>
 
     <changeSet id="20220306-006" author="amos-data-fi">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="biometric"/>
+            </not>
+        </preConditions>
         <sql>
             CREATE TABLE biometric
             (
@@ -30,6 +35,11 @@
         </sql>
     </changeSet>
     <changeSet id="20220706-007" author="amos-data-fi">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="biometric_device"/>
+            </not>
+        </preConditions>
         <sql>
             CREATE TABLE "biometric_device"
             (

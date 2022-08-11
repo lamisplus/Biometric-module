@@ -15,8 +15,6 @@ webModules:
     path: biometric
     position: 99
 permissions:
-  - name: biometric_capture
-    description: Capture biometric
   - name: biometric_add_device
     description: Add biometric devices
   - name: biometric_delete_device

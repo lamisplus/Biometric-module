@@ -126,4 +126,28 @@ public class BiometricService {
         }
         return biometricDeviceRepository.findAll();
     }
+
+    public BiometricDto updatePersonBiometric(Long personId, BiometricEnrollmentDto biometricEnrollmentDto) {
+        biometricRepository.deleteAll(this.getPersonBiometrics(personId));
+        return biometricEnrollment(biometricEnrollmentDto);
+    }
+    public List<Biometric> getAllPersonBiometric(Long personId) {
+        List<Biometric> personBiometrics = this.getPersonBiometrics(personId);
+        if(personBiometrics.isEmpty())throw new EntityNotFoundException(Biometric.class,"patientId:", ""+personId);
+        return personBiometrics;
+    }
+    public List<Biometric> getPersonBiometrics(Long personId){
+        Person person = personRepository.findById (personId)
+                .orElseThrow(() -> new EntityNotFoundException(Person.class,"patientId:", ""+personId));
+        List<Biometric> personBiometrics = biometricRepository.findAllByPersonUuid(person.getUuid());
+        return personBiometrics;
+    }
+    public void deleteAllPersonBiometrics(Long personId) {
+        this.biometricRepository.deleteAll(this.getAllPersonBiometric(personId));
+    }
+    public void deleteBiometrics(String id) {
+        Biometric biometric = biometricRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException(Biometric.class,"id:", ""+id));
+        biometricRepository.deleteById(biometric.getId());
+    }
 }
