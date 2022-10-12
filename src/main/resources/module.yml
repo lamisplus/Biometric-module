@@ -3,7 +3,7 @@ name: BiometricModule
 store: true
 dependencies: {PatientModule: 1.0.0}
 menus:
-  - icon:
+  - icon: fa fa-hand-paper-o
     disabled: false
     name: Biometric Setup
     state: biometric
