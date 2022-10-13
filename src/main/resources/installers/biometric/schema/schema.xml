@@ -30,6 +30,7 @@
                 iso                BOOLEAN,
                 extra              JSONB,
                 device_name        VARCHAR(255),
+                version_iso_20     VARCHAR(255),
                 CONSTRAINT pk_biometric PRIMARY KEY (id)
             );
         </sql>
