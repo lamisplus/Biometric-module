@@ -31,7 +31,12 @@
                 extra              JSONB,
                 device_name        VARCHAR(255),
                 version_iso_20     VARCHAR(255),
-                CONSTRAINT pk_biometric PRIMARY KEY (id)
+                CONSTRAINT pk_biometric PRIMARY KEY (id),
+                CONSTRAINT person_uuid_fk FOREIGN KEY (person_uuid)
+                    REFERENCES public.patient_person (uuid) MATCH SIMPLE
+                    ON UPDATE NO ACTION
+                    ON DELETE RESTRICT
+                    NOT VALID
             );
         </sql>
     </changeSet>
