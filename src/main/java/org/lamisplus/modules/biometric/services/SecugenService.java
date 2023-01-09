@@ -40,7 +40,7 @@ public class SecugenService {
         try {
             biometric = secugenManager.captureFingerPrint(biometric);
             AtomicReference<Boolean> matched = new AtomicReference<>(false);
-            if (biometric.getTemplate().length > 200 && biometric.getImageQuality() >= 80) {
+            if (biometric.getTemplate().length > 200 && biometric.getImageQuality() >= 61) {
                 byte[] scannedTemplate = biometric.getTemplate();
                 if(biometric.getTemplate() != null && !BiometricStoreDTO.getPatientBiometricStore().isEmpty()) {
                     final List<CapturedBiometricDto> capturedBiometricsListDTO = BiometricStoreDTO
@@ -114,7 +114,7 @@ public class SecugenService {
         int imageQuality = biometricEnrollmentDto.getImageQuality();
         int templateLength = biometricEnrollmentDto.getTemplate().length;
         biometricEnrollmentDto.getMessage().put("ERROR", "ERROR WHILE CAPTURING... " +
-                "\nImage Quality: " + (imageQuality < 80 ? "Bad - " + imageQuality : "Good - " + imageQuality) +
+                "\nImage Quality: " + (imageQuality < 65 ? "Bad - " + imageQuality : "Good - " + imageQuality) +
                 "\nTemplate Length: " + (templateLength < 200 ? "Bad - " + templateLength : "Good - " + templateLength) +
                 "\n" + (customMessage != null ? customMessage : "")
         );

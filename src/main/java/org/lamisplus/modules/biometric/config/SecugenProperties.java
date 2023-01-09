@@ -20,6 +20,6 @@ public class SecugenProperties {
     
     private Long timeout = 3000L;
     
-    private Long quality = 80L;
+    private Long quality = 61L;
     
 }
