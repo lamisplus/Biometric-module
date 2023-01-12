@@ -106,12 +106,38 @@ public class BiometricService {
         }
         return biometric;
     }
-    public BiometricDevice update(Long id, BiometricDevice biometricDevice){
-        biometricDeviceRepository
+    private List<BiometricDevice> saveDevices(BiometricDevice biometricDevice, Boolean active){
+        List <BiometricDevice> biometricDevices = new ArrayList<>();
+
+        if(active){
+            BiometricDevice biometricDevice1 = biometricDeviceRepository.findByActiveIsTrue();
+            biometricDevice1.setActive(false);
+            biometricDevices.add(biometricDevice1);
+            biometricDevice.setActive(true);
+        }else {
+            biometricDevice.setActive(false);
+        }
+        biometricDevices.add(biometricDevice);
+        return biometricDevices;
+    }
+
+    public BiometricDevice saveBiometricDevice(BiometricDevice biometricDevice, Boolean active){
+        List <BiometricDevice> biometricDevices = this.saveDevices(biometricDevice,active);
+        biometricDeviceRepository.saveAll(biometricDevices);
+        return biometricDevice;
+    }
+
+    public BiometricDevice update(Long id, BiometricDevice updatedBiometricDevice, Boolean active){
+       biometricDeviceRepository
                 .findById(id)
                 .orElseThrow(()-> new EntityNotFoundException(BiometricDevice.class, "id", ""+id));
-        biometricDevice.setId(id);
-        return biometricDeviceRepository.save(biometricDevice);
+
+
+        updatedBiometricDevice.setId(id);
+        List <BiometricDevice> biometricDevices = this.saveDevices(updatedBiometricDevice,active);
+        biometricDeviceRepository.saveAll(biometricDevices);
+
+        return updatedBiometricDevice;
     }
     public void delete(Long id) {
         BiometricDevice biometricDevice = biometricDeviceRepository

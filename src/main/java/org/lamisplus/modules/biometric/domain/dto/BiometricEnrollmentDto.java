@@ -18,6 +18,7 @@ public class BiometricEnrollmentDto implements Serializable {
     @NotBlank(message = "templateType is mandatory")
     private String templateType;
     private String deviceName;
+    private String deviceType;
     @NotBlank(message = "biometricType is mandatory")
     private String biometricType;
     public enum Type {ERROR, SUCCESS}
