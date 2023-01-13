@@ -186,7 +186,9 @@ const BiometricList = (props) => {
                     //{ title: "Id", field: "id", filtering: false },
                     { title: "Name", field: "name" },
                     { title: "URL", field: "url", filtering: false },
+                    { title: "Port", field: "port", filtering: false },
                     { title: "Status", field: "status", filtering: false },
+                    { title: "Default", field: "default", filtering: false },
                     { title: "Actions", field: "actions", filtering: false },
                 ]}
                 isLoading={loading}
@@ -194,9 +196,10 @@ const BiometricList = (props) => {
                     //id: row.id,
                     name: row.name,
                     url: row.url,
+                    port: row.port,
                     type: row.type,
                     status: row.active===true ? "Active" : "Not Active",
-
+                    default: row.default,
                     actions: (
                         <div>
                            {permissions.includes('biometric_update_device') || permissions.includes("all_permission") ? (

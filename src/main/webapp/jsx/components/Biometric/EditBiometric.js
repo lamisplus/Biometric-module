@@ -31,7 +31,7 @@ const EditBiometricDevice = (props) => {
     useEffect(() => {
         setDetails(props.datasample)
     }, [props.datasample]);
-    console.log(details)
+
     const handleOtherFieldInputChange = e => {
         setDetails ({ ...details, [e.target.name]: e.target.value });
     }
@@ -96,7 +96,7 @@ const EditBiometricDevice = (props) => {
                                         <div className="row">
                                             
                                             <div className="form-group col-md-12">
-                                                <label> Name</label>
+                                                <label> Name *</label>
                                                 <input
                                                     type="text"
                                                     name="name"
@@ -110,7 +110,7 @@ const EditBiometricDevice = (props) => {
                                                 ) : "" }
                                             </div>
                                             <div className="form-group col-md-12">
-                                                <label>Url</label>
+                                                <label>Url *</label>
                                                 <input
                                                     type="text"
                                                     name="url"
@@ -126,7 +126,20 @@ const EditBiometricDevice = (props) => {
                                                 ) : "" }
                                             </div>
                                             <div className="form-group col-md-12">
-                                                <label>Status</label>
+                                                <label>Port</label>
+                                                <input
+                                                    type="text"
+                                                    name="port"
+                                                    id="port"
+                                                    className="form-control"
+                                                    value={details.port}
+                                                    onChange={handleOtherFieldInputChange}
+                                                    required
+                                                />
+
+                                            </div>
+                                            <div className="form-group col-md-12">
+                                                <label>Status *</label>
                                                 
                                                 <select
                                                 defaultValue={"true"}
@@ -143,7 +156,23 @@ const EditBiometricDevice = (props) => {
                                                     <span className={classes.error}>{errors.active}</span>
                                                 ) : "" } 
                                             </div>
-
+                                            <div className="form-group col-md-12">
+                                                <label>Default *</label>
+                                                <select
+                                                    //defaultValue={"true"}
+                                                    name="active"
+                                                    id="active"
+                                                    className="form-control wide"
+                                                    onChange={handleOtherFieldInputChange}
+                                                >
+                                                    <option value=""> Select</option>
+                                                    <option value="true"> Yes</option>
+                                                    <option value="false">No </option>
+                                                </select>
+                                                {errors.type !=="" ? (
+                                                    <span className={classes.error}>{errors.type}</span>
+                                                ) : "" }
+                                            </div>
                                             {/*Second Row of the Field by Col */}
 
                                         </div>
