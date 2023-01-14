@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface BiometricDeviceRepository extends JpaRepository<BiometricDevice, Long> {
     List<BiometricDevice> getAllByActiveIsTrue();
+    BiometricDevice findByActiveIsTrue();
 }
