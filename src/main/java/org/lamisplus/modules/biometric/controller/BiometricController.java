@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BiometricController {
     private final BiometricService biometricService;
-    private final BiometricDeviceRepository biometricDeviceRepository;
+    //private final BiometricDeviceRepository biometricDeviceRepository;
     private final SecugenService secugenService;
     //Versioning through URI Path
     private final String BASE_URL_VERSION_ONE = "/api/v1/biometrics";
@@ -78,12 +78,5 @@ public class BiometricController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBiometrics(@PathVariable String id) {
         biometricService.deleteBiometrics (id);
-    }
-
-    @PostMapping(BASE_URL_VERSION_ONE + "/enrollment")
-    public BiometricEnrollmentDto enrollment(@RequestParam String reader,
-                                             @RequestParam(required = false, defaultValue = "false") Boolean isNew,
-                                             @Valid @RequestBody CaptureRequestDTO captureRequestDTO) {
-        return secugenService.enrollment(reader, isNew, captureRequestDTO);
     }
 }

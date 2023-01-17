@@ -21,7 +21,7 @@ public class BiometricDevice {
 
     @NotBlank
     private String name;
-    private String port;
+    //private String port;
     private String type;
     private String url;
     private Boolean active = true;
