@@ -12,15 +12,75 @@ import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { token as token, url as baseUrl } from "./../../../api";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
+    card: {
+        margin: theme.spacing(20),
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center"
+    },
+    form: {
+        width: "100%", // Fix IE 11 issue.
+        marginTop: theme.spacing(3),
+    },
+    submit: {
+        margin: theme.spacing(3, 0, 2),
+    },
+    cardBottom: {
+        marginBottom: 20,
+    },
+    Select: {
+        height: 45,
+        width: 300,
+    },
     button: {
-        margin: theme.spacing(1)
+        margin: theme.spacing(1),
     },
-    error: {
-        color: "#f85032",
-        fontSize: "12.8px",
+    root: {
+        '& > *': {
+            margin: theme.spacing(1)
+        },
+        "& .card-title":{
+            color:'#fff',
+            fontWeight:'bold'
+        },
+        "& .form-control":{
+            borderRadius:'0.25rem',
+            height:'41px'
+        },
+        "& .card-header:first-child": {
+            borderRadius: "calc(0.25rem - 1px) calc(0.25rem - 1px) 0 0"
+        },
+        "& .dropdown-toggle::after": {
+            display: " block !important"
+        },
+        "& select":{
+            "-webkit-appearance": "listbox !important"
+        },
+        "& p":{
+            color:'red'
+        },
+        "& label":{
+            fontSize:'14px',
+            color:'#014d88',
+            fontWeight:'bold'
+        }
     },
-}))
+    demo: {
+        backgroundColor: theme.palette.background.default,
+    },
+    inline: {
+        display: "inline",
+    },
+    error:{
+        color: '#f85032',
+        fontSize: '12.8px'
+    },
+    success: {
+        color: "#4BB543 ",
+        fontSize: "11px",
+    },
+}));
 
 const EditBiometricDevice = (props) => {
     const classes = useStyles()
@@ -41,6 +101,7 @@ const EditBiometricDevice = (props) => {
         temp.url = details.url ? "" : "This field is required"
         temp.name = details.name ? "" : "This field is required"
         temp.active = details.active ? "" : "This field is required"
+        //temp.port = details.port ? "" : "This field is required"
         setErrors({
             ...temp
         })
@@ -58,12 +119,13 @@ const EditBiometricDevice = (props) => {
         e.preventDefault()
         if(validate()){
             axios
-            .put(`${baseUrl}biometrics/device/${details.id}`,details,
+            .put(`${baseUrl}biometrics/device/${details.id}?active=${details.active}`,details,
             { headers: {"Authorization" : `Bearer ${token}`} }
             )
             .then((response) => {                
                 props.loadBiometricDevices()               
                 toast.success("Biometric Device Updated Successfully!")
+                setDetails({active: "", name:"", url:"", port:"", type:""})
                 props.togglestatus()                  
             })
             .catch((error) => { 
@@ -90,7 +152,7 @@ const EditBiometricDevice = (props) => {
                         <div className="card">
 
                             <div className="card-body">
-                                <div className="basic-form">
+                                <div className={classes.root}>
                                     <form onSubmit={(e) => e.preventDefault()}>
                                        
                                         <div className="row">
@@ -126,7 +188,7 @@ const EditBiometricDevice = (props) => {
                                                 ) : "" }
                                             </div>
                                             <div className="form-group col-md-12">
-                                                <label>Port</label>
+                                                <label>Port </label>
                                                 <input
                                                     type="text"
                                                     name="port"
@@ -139,40 +201,25 @@ const EditBiometricDevice = (props) => {
 
                                             </div>
                                             <div className="form-group col-md-12">
-                                                <label>Status *</label>
+                                                <label>Default *</label>
                                                 
                                                 <select
-                                                defaultValue={"true"}
+
                                                 name="active"
                                                 id="active"
                                                 className="form-control wide"
+                                                value={details.active}
                                                 onChange={handleOtherFieldInputChange}
                                                 >  
                                                 <option value=""> Select</option>                                 
-                                                <option value="true"> Active</option>
-                                                <option value="false">Not Active </option>
+                                                <option value="true"> Yes</option>
+                                                <option value="false">No</option>
                                                 </select>
                                                 {errors.active !=="" ? (
                                                     <span className={classes.error}>{errors.active}</span>
                                                 ) : "" } 
                                             </div>
-                                            <div className="form-group col-md-12">
-                                                <label>Default *</label>
-                                                <select
-                                                    //defaultValue={"true"}
-                                                    name="active"
-                                                    id="active"
-                                                    className="form-control wide"
-                                                    onChange={handleOtherFieldInputChange}
-                                                >
-                                                    <option value=""> Select</option>
-                                                    <option value="true"> Yes</option>
-                                                    <option value="false">No </option>
-                                                </select>
-                                                {errors.type !=="" ? (
-                                                    <span className={classes.error}>{errors.type}</span>
-                                                ) : "" }
-                                            </div>
+
                                             {/*Second Row of the Field by Col */}
 
                                         </div>
