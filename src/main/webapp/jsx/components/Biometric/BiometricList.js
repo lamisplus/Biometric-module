@@ -162,7 +162,7 @@ const BiometricList = (props) => {
 
             <Card className={classes.cardBottom}>
                 <CardContent>
-                {permissions.includes('biometric_add_device') || permissions.includes("all_permission") ? (
+
                         <MatButton
                             variant="contained"
                             color="primary"
@@ -174,8 +174,7 @@ const BiometricList = (props) => {
                             &nbsp;&nbsp;
                             <span style={{ textTransform: "lowercase" }}> Device</span>
                         </MatButton>
-                     ):""
-                }
+
                     <br />
 
                     <br />
