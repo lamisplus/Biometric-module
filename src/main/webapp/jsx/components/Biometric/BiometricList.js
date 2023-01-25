@@ -201,18 +201,13 @@ const BiometricList = (props) => {
 
                     actions: (
                         <div>
-                           {permissions.includes('biometric_update_device') || permissions.includes("all_permission") ? (
+
                             <Label as='a' color='blue' className="ms-1" size='mini' onClick={() =>  editDevice(row)}>
                                 <Icon name='pencil' /> Edit
                             </Label>
-                            ):""
-                            }
-                            {permissions.includes('biometric_delete_device') || permissions.includes("all_permission") ? (
                             <Label as='a' color='red' onClick={() =>  deleteModal(row)}  size='mini'>
                                 <Icon name='trash' /> Delete
                             </Label>
-                            ):""
-                            }
 
                         </div>
                     ),
