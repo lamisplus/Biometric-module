@@ -87,24 +87,40 @@ const BiometricList = (props) => {
     const [loading, setLoading] = useState(true);
     const [modal, setModal] = useState(false);
     const [deviceId, setdeviceId] = useState("");
+    const [permissions, setPermissions] = useState([]);
 
     useEffect(() => {
-        loadBiometricDevices()
+        loadBiometricDevices();
+        userPermission(); 
     }, []); //componentDidMount to get module menus
    // Method to load Biometric devices
-        async function loadBiometricDevices() {
-            axios
-                .get(`${baseUrl}biometrics/devices`,
-                { headers: {"Authorization" : `Bearer ${token}`} }
-                )
-                .then((response) => {
-                    setLoading(false)
-                    setBiometricList(response.data);                   
-                })
-                .catch((error) => {  
-                    setLoading(false)  
-                });        
-        }
+    async function loadBiometricDevices() {
+        axios
+            .get(`${baseUrl}biometrics/devices`,
+            { headers: {"Authorization" : `Bearer ${token}`} }
+            )
+            .then((response) => {
+                setLoading(false)
+                setBiometricList(response.data);                   
+            })
+            .catch((error) => {  
+                setLoading(false)  
+            });        
+    }
+    //Get list of Permissions
+    const userPermission =()=>{
+        axios
+           .get(`${baseUrl}account`,
+               { headers: {"Authorization" : `Bearer ${token}`} }
+           )
+           .then((response) => {
+                setPermissions(response.data.permissions);
+      
+           })
+           .catch((error) => {
+           });
+       
+     }
 
     const deleteModal = (row) => {
         setdeviceId(row.id);
@@ -146,6 +162,7 @@ const BiometricList = (props) => {
 
             <Card className={classes.cardBottom}>
                 <CardContent>
+
                         <MatButton
                             variant="contained"
                             color="primary"
@@ -168,7 +185,9 @@ const BiometricList = (props) => {
                     //{ title: "Id", field: "id", filtering: false },
                     { title: "Name", field: "name" },
                     { title: "URL", field: "url", filtering: false },
-                    { title: "Status", field: "status", filtering: false },
+                    { title: "Port", field: "port", filtering: false },
+                    { title: "Default", field: "status", filtering: false },
+
                     { title: "Actions", field: "actions", filtering: false },
                 ]}
                 isLoading={loading}
@@ -176,20 +195,19 @@ const BiometricList = (props) => {
                     //id: row.id,
                     name: row.name,
                     url: row.url,
+                    port: row.port,
                     type: row.type,
                     status: row.active===true ? "Active" : "Not Active",
 
                     actions: (
                         <div>
-                           
+
                             <Label as='a' color='blue' className="ms-1" size='mini' onClick={() =>  editDevice(row)}>
                                 <Icon name='pencil' /> Edit
                             </Label>
-
                             <Label as='a' color='red' onClick={() =>  deleteModal(row)}  size='mini'>
                                 <Icon name='trash' /> Delete
                             </Label>
-
 
                         </div>
                     ),

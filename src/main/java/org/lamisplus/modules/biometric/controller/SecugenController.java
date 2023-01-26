@@ -1,26 +1,18 @@
 package org.lamisplus.modules.biometric.controller;
 
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.biometric.domain.dto.BiometricEnrollmentDto;
 import org.lamisplus.modules.biometric.domain.dto.CaptureRequestDTO;
 import org.lamisplus.modules.biometric.domain.dto.DeviceDTO;
 import org.lamisplus.modules.biometric.domain.dto.ErrorCodeDTO;
-import org.lamisplus.modules.biometric.enumeration.ErrorCode;
-import org.lamisplus.modules.biometric.repository.BiometricDeviceRepository;
-import org.lamisplus.modules.biometric.services.BiometricService;
 import org.lamisplus.modules.biometric.services.SecugenManager;
 import org.lamisplus.modules.biometric.services.SecugenService;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
@@ -29,22 +21,23 @@ import java.util.List;
 public class SecugenController {
     private final SecugenService secugenService;
     //Versioning through URI Path
-    private final String BASE_URL_VERSION_ONE = "/api/v1/biometrics/secugen";
+    private final String SECUGEN_URL_VERSION_ONE = "/api/v1/biometrics/secugen";
+    private final String BIOMETRICS_URL_VERSION_ONE = "/api/v1/biometrics";
     private final SecugenManager secugenManager;
 
 
-    @GetMapping(BASE_URL_VERSION_ONE + "/server")
+    @GetMapping(SECUGEN_URL_VERSION_ONE + "/server")
     public String getServerUrl() {
         return secugenManager.getSecugenProperties().getServerUrl();
     }
 
-    @GetMapping(BASE_URL_VERSION_ONE + "/reader")
+    @GetMapping(SECUGEN_URL_VERSION_ONE + "/reader")
     public ResponseEntity<Object> getReaders() {
         List<DeviceDTO> devices = secugenManager.getDevices();
         return ResponseEntity.ok(devices);
     }
 
-    @PostMapping(BASE_URL_VERSION_ONE + "/enrollment")
+    @PostMapping(BIOMETRICS_URL_VERSION_ONE + "/enrollment")
     public BiometricEnrollmentDto enrollment(@RequestParam String reader,
                                              @RequestParam(required = false, defaultValue = "false") Boolean isNew,
                                              @Valid @RequestBody CaptureRequestDTO captureRequestDTO) {
@@ -79,7 +72,7 @@ public class SecugenController {
         }
     }*/
 
-    @GetMapping(BASE_URL_VERSION_ONE + "/boot")
+    @GetMapping(SECUGEN_URL_VERSION_ONE + "/boot")
     public ErrorCodeDTO boot(@RequestParam String reader) {
         return secugenService.boot(reader);
     }

@@ -24,6 +24,7 @@ import static SecuGen.FDxSDKPro.jni.SGPPPortAddr.USB_AUTO_DETECT;
 @Service
 public class SecugenManager {
 
+    public static final int QUALITY = 61;
     private JSGFPLib sgfplib;
     private SGDeviceInfoParam deviceInfo;
     private Long error;
@@ -232,7 +233,7 @@ public class SecugenManager {
                     iError = this.sgfplib.GetMatchingScore(regTemplate, regTemplate2, score);
                     if (iError == SGFDxErrorCode.SGFDX_ERROR_NONE) {
                         biometric.setMatchingScore(score[0]);
-                        if (score[0] >= 80) {   // Enroll these fingerprints to database
+                        if (score[0] >= QUALITY) {   // Enroll these fingerprints to database
                             biometric.setImage(imageQuality > imageQuality2 ? imageBuffer : imageBuffer2);
                             biometric.setImageQuality(imageQuality > imageQuality2 ? imageQuality : imageQuality2);
                             biometric.setTemplate(imageQuality > imageQuality2 ? regTemplate : regTemplate2);

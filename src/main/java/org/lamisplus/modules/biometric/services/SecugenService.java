@@ -19,6 +19,7 @@ public class SecugenService {
         if(isNew){
             this.emptyStoreByPersonId(captureRequestDTO.getPatientId());
         }
+
         BiometricEnrollmentDto biometric = getBiometricEnrollmentDto(captureRequestDTO);
         if(biometric.getMessage() == null)biometric.setMessage(new HashMap<>());
         if (this.scannerIsNotSet(reader)) {
@@ -40,7 +41,7 @@ public class SecugenService {
         try {
             biometric = secugenManager.captureFingerPrint(biometric);
             AtomicReference<Boolean> matched = new AtomicReference<>(false);
-            if (biometric.getTemplate().length > 200 && biometric.getImageQuality() >= 80) {
+            if (biometric.getTemplate().length > 200 && biometric.getImageQuality() >= 61) {
                 byte[] scannedTemplate = biometric.getTemplate();
                 if(biometric.getTemplate() != null && !BiometricStoreDTO.getPatientBiometricStore().isEmpty()) {
                     final List<CapturedBiometricDto> capturedBiometricsListDTO = BiometricStoreDTO
@@ -56,7 +57,7 @@ public class SecugenService {
                         if (matched.get()) {
                             //biometric.setCapturedBiometricsList(BiometricStoreDTO.getPatientBiometricStore().get(biometric.getPatientId()));
                             biometric.setCapturedBiometricsList(capturedBiometricsListDTO);
-                            return this.addErrorMessage(biometric, "Fingerprint already captured");
+                            return this.addMessage(biometric, "Fingerprint already captured");
                         }
                     }
                 } else {
@@ -75,12 +76,12 @@ public class SecugenService {
                 biometric.setCapturedBiometricsList(capturedBiometricsList);
                 biometric.setTemplate(scannedTemplate);
             }else {
-                return this.addErrorMessage(biometric, null);
+                return this.addMessage(biometric, null);
             }
 
         } catch (Exception exception) {
             exception.printStackTrace();
-            return this.addErrorMessage(biometric, exception.getMessage());
+            return this.addMessage(biometric, exception.getMessage());
         }
         return biometric;
     }
@@ -110,11 +111,11 @@ public class SecugenService {
         biometricEnrollmentDto.setPatientId(captureRequestDTO.getPatientId());
         return biometricEnrollmentDto;
     }
-    private BiometricEnrollmentDto addErrorMessage(BiometricEnrollmentDto biometricEnrollmentDto, String customMessage){
+    private BiometricEnrollmentDto addMessage(BiometricEnrollmentDto biometricEnrollmentDto, String customMessage){
         int imageQuality = biometricEnrollmentDto.getImageQuality();
         int templateLength = biometricEnrollmentDto.getTemplate().length;
         biometricEnrollmentDto.getMessage().put("ERROR", "ERROR WHILE CAPTURING... " +
-                "\nImage Quality: " + (imageQuality < 80 ? "Bad - " + imageQuality : "Good - " + imageQuality) +
+                "\nImage Quality: " + (imageQuality < 65 ? "Bad - " + imageQuality : "Good - " + imageQuality) +
                 "\nTemplate Length: " + (templateLength < 200 ? "Bad - " + templateLength : "Good - " + templateLength) +
                 "\n" + (customMessage != null ? customMessage : "")
         );

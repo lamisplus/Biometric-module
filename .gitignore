@@ -27,3 +27,11 @@ build
 db
 .DS_Store
 local-data
+src/main/resources/views/static/biometric/*
+node/node.exe
+node/npm
+node/npm.cmd
+node/npx
+node/npx.cmd
+.mvn/wrapper/maven-wrapper.properties
+.jpb/jpb-settings.xml
