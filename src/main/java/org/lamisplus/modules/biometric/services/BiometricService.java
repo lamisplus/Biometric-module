@@ -110,9 +110,12 @@ public class BiometricService {
         List <BiometricDevice> biometricDevices = new ArrayList<>();
 
         if(active){
-            BiometricDevice biometricDevice1 = biometricDeviceRepository.findByActiveIsTrue();
-            biometricDevice1.setActive(false);
-            biometricDevices.add(biometricDevice1);
+            Optional<BiometricDevice> optional = biometricDeviceRepository.findByActive(true);
+            if(optional.isPresent()) {
+                BiometricDevice biometricDevice1 = optional.get();
+                biometricDevice1.setActive(false);
+                biometricDevices.add(biometricDevice1);
+            }
             biometricDevice.setActive(true);
         }else {
             biometricDevice.setActive(false);

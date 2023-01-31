@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -26,14 +27,17 @@ public class SecugenController {
     private final SecugenManager secugenManager;
 
 
-    @GetMapping(SECUGEN_URL_VERSION_ONE + "/server")
+    @GetMapping(BIOMETRICS_URL_VERSION_ONE + "/server")
     public String getServerUrl() {
         return secugenManager.getSecugenProperties().getServerUrl();
     }
 
-    @GetMapping(SECUGEN_URL_VERSION_ONE + "/reader")
-    public ResponseEntity<Object> getReaders() {
+    @GetMapping(BIOMETRICS_URL_VERSION_ONE + "/reader")
+    public ResponseEntity<List<DeviceDTO>> getReaders() {
         List<DeviceDTO> devices = secugenManager.getDevices();
+        devices =  devices.stream()
+                .filter(d-> Integer.valueOf(d.getId())==255)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(devices);
     }
 
