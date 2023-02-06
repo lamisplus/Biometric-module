@@ -1,6 +1,8 @@
 package org.lamisplus.modules.biometric.controller;
 
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.biometric.domain.dto.BiometricEnrollmentDto;
@@ -9,10 +11,13 @@ import org.lamisplus.modules.biometric.domain.dto.DeviceDTO;
 import org.lamisplus.modules.biometric.domain.dto.ErrorCodeDTO;
 import org.lamisplus.modules.biometric.services.SecugenManager;
 import org.lamisplus.modules.biometric.services.SecugenService;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,7 +54,7 @@ public class SecugenController {
     }
 
 
-    /*@PostMapping(BASE_URL_VERSION_ONE + "/enrollment2")
+    @PostMapping(BIOMETRICS_URL_VERSION_ONE + "/enrollment2")
     public BiometricEnrollmentDto enrollment2(@RequestParam String reader,
                                               @Valid @RequestBody CaptureRequestDTO captureRequestDTO) {
         BiometricEnrollmentDto biometric = secugenService.getBiometricEnrollmentDto(captureRequestDTO);
@@ -74,7 +79,7 @@ public class SecugenController {
         catch(Exception e){
             throw new RuntimeException(e);
         }
-    }*/
+    }
 
     @GetMapping(SECUGEN_URL_VERSION_ONE + "/boot")
     public ErrorCodeDTO boot(@RequestParam String reader) {

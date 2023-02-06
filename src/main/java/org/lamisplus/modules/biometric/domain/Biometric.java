@@ -64,6 +64,8 @@ public class Biometric extends BiometricAuditEntity  implements Serializable, Pe
     @Column(name = "device_name")
     private String deviceName;
 
+    private String reason;
+
     @Override
     public boolean isNew() {
         return id == null;

@@ -30,4 +30,6 @@ public class BiometricEnrollmentDto implements Serializable {
     private int matchingScore;
     private int imageQuality;
     private byte[] image;
+    private String reason;
+    private int age;
 }

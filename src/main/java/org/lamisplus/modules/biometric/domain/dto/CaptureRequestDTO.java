@@ -5,7 +5,9 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Data
@@ -19,5 +21,9 @@ public class CaptureRequestDTO {
     @NotBlank(message = "biometricType is mandatory")
     private String biometricType;
 
-    List<CapturedBiometricDto> capturedBiometricsList = new ArrayList<>();
+    private String reason;
+
+    private int age;
+
+    Set<CapturedBiometricDto> capturedBiometricsList = new HashSet<>();
 }

@@ -40,9 +40,10 @@ public class BiometricService {
 
         String biometricType = biometricEnrollmentDto.getBiometricType ();
         String deviceName = biometricEnrollmentDto.getDeviceName ();
+        String reason = biometricEnrollmentDto.getReason();
         List<CapturedBiometricDto> capturedBiometricsList = biometricEnrollmentDto.getCapturedBiometricsList ();
         List<Biometric> biometrics = capturedBiometricsList.stream ()
-                .map (capturedBiometricDto -> convertDtoToEntity (capturedBiometricDto, person, biometricType, deviceName))
+                .map (capturedBiometricDto -> convertDtoToEntity (capturedBiometricDto, person, biometricType, deviceName, reason))
                 .collect (Collectors.toList ());
         biometricRepository.saveAll (biometrics);
         return getBiometricDto (biometrics, personId);
@@ -89,7 +90,7 @@ public class BiometricService {
     private Biometric convertDtoToEntity(
             CapturedBiometricDto capturedBiometricDto,
             Person person, String biometricType,
-            String deviceName) {
+            String deviceName, String reason) {
         Biometric biometric = new Biometric ();
         biometric.setId (UUID.randomUUID ().toString ());
         biometric.setBiometricType (biometricType);
@@ -98,6 +99,7 @@ public class BiometricService {
         biometric.setTemplateType (capturedBiometricDto.getTemplateType ());
         biometric.setDate (LocalDate.now ());
         biometric.setIso (true);
+        biometric.setReason(reason);
         biometric.setPersonUuid (person.getUuid ());
         Optional<User> userWithRoles = userService.getUserWithRoles ();
         if(userWithRoles.isPresent ()){
