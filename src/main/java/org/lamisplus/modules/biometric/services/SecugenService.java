@@ -3,11 +3,10 @@ package org.lamisplus.modules.biometric.services;
 import lombok.RequiredArgsConstructor;
 import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.enumeration.ErrorCode;
+import org.lamisplus.modules.biometric.repository.BiometricRepository;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -15,10 +14,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SecugenService {
     private final SecugenManager secugenManager;
+    private final BiometricRepository biometricRepository;
+    private final CurrentUserOrganizationService facility;
     public BiometricEnrollmentDto enrollment(String reader, Boolean isNew, CaptureRequestDTO captureRequestDTO){
         if(isNew){
             this.emptyStoreByPersonId(captureRequestDTO.getPatientId());
         }
+        //this.emptyStoreByPersonId(captureRequestDTO.getPatientId());
 
         BiometricEnrollmentDto biometric = getBiometricEnrollmentDto(captureRequestDTO);
         if(biometric.getMessage() == null)biometric.setMessage(new HashMap<>());
@@ -35,13 +37,34 @@ public class SecugenService {
             biometric.getMessage().put("ERROR", errorCode.getErrorName() + ": " + errorCode.getErrorMessage());
             return biometric;
         }
-        captureRequestDTO.getCapturedBiometricsList().forEach(capturedBiometricDto -> {
-            BiometricStoreDTO.addCapturedBiometrics(captureRequestDTO.getPatientId(), capturedBiometricDto);
-        });
+
         try {
             biometric = secugenManager.captureFingerPrint(biometric);
+            byte firstTwoChar = biometric.getTemplate()[0];
+            //String template = "46% OR AC%";
+            String template = Integer.toHexString(firstTwoChar)+"%";
+
+//            System.out.println("********************************************************");
+//            System.out.println("firstTwoChar inside: "+firstTwoChar);
+//            System.out.println("You convert?: "+template);
+//            System.out.println("********************************************************");
+
+            Set<StoredBiometric> biometricsInFacility = biometricRepository
+                    .findByFacilityIdWithTemplate(facility
+                            .getCurrentUserOrganization(), template);
+            //System.out.println("biometricsInFacility size - "+biometricsInFacility.size());
+
+            if(getMatch(biometricsInFacility, biometric.getTemplate())){
+                return this.addMessage(biometric, "Fingerprint already captured");
+            }
+
+            captureRequestDTO.getCapturedBiometricsList().forEach(capturedBiometricDto -> {
+                BiometricStoreDTO.addCapturedBiometrics(captureRequestDTO.getPatientId(), capturedBiometricDto);
+            });
+
+            //biometric = secugenManager.captureFingerPrint(biometric);
             AtomicReference<Boolean> matched = new AtomicReference<>(false);
-            if (biometric.getTemplate().length > 200 && biometric.getImageQuality() >= 61) {
+            if (biometric.getTemplate().length > 200 && (biometric.getImageQuality() >= 61 || biometric.getAge() <= 6)) {
                 byte[] scannedTemplate = biometric.getTemplate();
                 if(biometric.getTemplate() != null && !BiometricStoreDTO.getPatientBiometricStore().isEmpty()) {
                     final List<CapturedBiometricDto> capturedBiometricsListDTO = BiometricStoreDTO
@@ -52,11 +75,10 @@ public class SecugenService {
                             .collect(Collectors.toList());
 
                     for (CapturedBiometricDto capturedBiometricsDTO : capturedBiometricsListDTO) {
-                        matched.set(secugenManager.matchTemplate(capturedBiometricsDTO.getTemplate(),
-                                biometric.getTemplate()));
+                        matched.set(secugenManager.matchTemplate(capturedBiometricsDTO.getTemplate(), biometric.getTemplate()));
                         if (matched.get()) {
                             //biometric.setCapturedBiometricsList(BiometricStoreDTO.getPatientBiometricStore().get(biometric.getPatientId()));
-                            biometric.setCapturedBiometricsList(capturedBiometricsListDTO);
+                            //biometric.setCapturedBiometricsList(capturedBiometricsListDTO);
                             return this.addMessage(biometric, "Fingerprint already captured");
                         }
                     }
@@ -129,5 +151,35 @@ public class SecugenService {
             hasCleared = true;
         }
         return hasCleared;
+    }
+
+    public Boolean getMatch(Set<StoredBiometric> storedBiometrics, byte[] scannedTemplate) {
+        Boolean matched = Boolean.FALSE;
+        for (StoredBiometric biometric : storedBiometrics) {
+            if (biometric.getLeftIndexFinger() != null && biometric.getLeftIndexFinger().length != 0) {
+                matched = secugenManager.matchTemplate(biometric.getLeftIndexFinger(), scannedTemplate);
+            } else if (biometric.getLeftMiddleFinger() != null && biometric.getLeftMiddleFinger().length != 0) {
+                matched = secugenManager.matchTemplate(biometric.getLeftMiddleFinger(), scannedTemplate);
+            } else if (biometric.getLeftThumb() != null && biometric.getLeftThumb().length != 0) {
+                matched =  secugenManager.matchTemplate(biometric.getLeftThumb(), scannedTemplate);
+            } else if (biometric.getLeftLittleFinger() != null && biometric.getLeftLittleFinger().length != 0) {
+                matched = secugenManager.matchTemplate(biometric.getLeftLittleFinger(), scannedTemplate);
+            } else if (biometric.getLeftRingFinger() != null && biometric.getLeftRingFinger().length != 0) {
+                matched =  secugenManager.matchTemplate(biometric.getLeftRingFinger(), scannedTemplate);
+            } else if (biometric.getRightIndexFinger() != null && biometric.getRightIndexFinger().length != 0) {
+                matched =  secugenManager.matchTemplate(biometric.getRightIndexFinger(), scannedTemplate);
+            } else if (biometric.getRightMiddleFinger() != null && biometric.getRightMiddleFinger().length != 0) {
+                matched =  secugenManager.matchTemplate(biometric.getRightMiddleFinger(), scannedTemplate);
+            } else if (biometric.getRightThumb() != null && biometric.getRightThumb().length != 0) {
+                matched =  secugenManager.matchTemplate(biometric.getRightThumb(), scannedTemplate);
+            } else if (biometric.getRightRingFinger() != null && biometric.getRightRingFinger().length != 0) {
+                matched =  secugenManager.matchTemplate(biometric.getRightRingFinger(), scannedTemplate);
+            } else if (biometric.getRightLittleFinger() != null && biometric.getRightLittleFinger().length != 0) {
+                matched =  secugenManager.matchTemplate(biometric.getRightLittleFinger(), scannedTemplate);
+            }
+
+            if(matched)break;
+        }
+        return matched;
     }
 }

@@ -30,6 +30,7 @@
                 iso                BOOLEAN,
                 extra              JSONB,
                 device_name        VARCHAR(255),
+                reason              VARCHAR(255),
                 version_iso_20     BOOLEAN,
                 CONSTRAINT pk_biometric PRIMARY KEY (id),
                 CONSTRAINT person_uuid_fk FOREIGN KEY (person_uuid)
@@ -68,6 +69,7 @@
         </preConditions>
         <sql>
             INSERT INTO biometric_device(name, type, active)VALUES ('SG_DEV_AUTO', 'Secugen', 'true');
+            INSERT INTO biometric_device(type, active)VALUES ('Futronic', 'false');
         </sql>
     </changeSet>
 </databaseChangeLog>
