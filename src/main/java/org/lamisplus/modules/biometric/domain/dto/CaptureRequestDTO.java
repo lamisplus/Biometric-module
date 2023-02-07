@@ -24,6 +24,7 @@ public class CaptureRequestDTO {
     private String reason;
 
     private int age;
+    private Long facilityId=0L;
 
     Set<CapturedBiometricDto> capturedBiometricsList = new HashSet<>();
 }

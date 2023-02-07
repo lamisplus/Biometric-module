@@ -52,7 +52,7 @@ public class SecugenService {
             Set<StoredBiometric> biometricsInFacility = biometricRepository
                     .findByFacilityIdWithTemplate(facility
                             .getCurrentUserOrganization(), template);
-            System.out.println("biometricsInFacility size - "+biometricsInFacility.size());
+            //System.out.println("biometricsInFacility size - "+biometricsInFacility.size());
 
             if(getMatch(biometricsInFacility, biometric.getTemplate())){
                 return this.addMessage(biometric, "Fingerprint already captured");
