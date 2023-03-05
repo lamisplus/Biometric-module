@@ -68,8 +68,8 @@
             </sqlCheck>
         </preConditions>
         <sql>
-            INSERT INTO biometric_device(name, type, active)VALUES ('SG_DEV_AUTO', 'Secugen', 'true');
-            INSERT INTO biometric_device(type, active)VALUES ('Futronic', 'false');
+            INSERT INTO biometric_device(name, url, type, active)VALUES ('SG_DEV_AUTO', 'http://localhost:port/api/v1/biometrics/enrollment', 'Secugen', 'true');
+            INSERT INTO biometric_device(name, url, type, active)VALUES ('Futronic FS80H %231', 'http://localhost:port/api/v1/biometrics/enrollment', 'Futronic', 'false');
         </sql>
     </changeSet>
 </databaseChangeLog>

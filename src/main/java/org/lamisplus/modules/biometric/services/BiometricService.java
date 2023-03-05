@@ -100,6 +100,7 @@ public class BiometricService {
         biometric.setDate (LocalDate.now ());
         biometric.setIso (true);
         biometric.setReason(reason);
+        biometric.setVersionIso20(true);
         biometric.setPersonUuid (person.getUuid ());
         Optional<User> userWithRoles = userService.getUserWithRoles ();
         if(userWithRoles.isPresent ()){
