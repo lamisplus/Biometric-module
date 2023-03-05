@@ -49,14 +49,17 @@ public class SecugenService {
 //            System.out.println("You convert?: "+template);
 //            System.out.println("********************************************************");
 
-            Set<StoredBiometric> biometricsInFacility = biometricRepository
-                    .findByFacilityIdWithTemplate(facility
-                            .getCurrentUserOrganization(), template);
-            //System.out.println("biometricsInFacility size - "+biometricsInFacility.size());
+           /* if(biometric.getImageQuality() > 61) {
+                Set<StoredBiometric> biometricsInFacility = biometricRepository
+                        .findByFacilityIdWithTemplate(facility
+                                .getCurrentUserOrganization(), template);
 
-            if(getMatch(biometricsInFacility, biometric.getTemplate())){
-                return this.addMessage(biometric, "Fingerprint already captured");
-            }
+                //System.out.println("biometricsInFacility size - "+biometricsInFacility.size());
+
+                if (getMatch(biometricsInFacility, biometric.getTemplate())) {
+                    return this.addMessage(biometric, "Fingerprint already captured");
+                }
+            }*/
 
             captureRequestDTO.getCapturedBiometricsList().forEach(capturedBiometricDto -> {
                 BiometricStoreDTO.addCapturedBiometrics(captureRequestDTO.getPatientId(), capturedBiometricDto);
@@ -64,7 +67,16 @@ public class SecugenService {
 
             //biometric = secugenManager.captureFingerPrint(biometric);
             AtomicReference<Boolean> matched = new AtomicReference<>(false);
-            if (biometric.getTemplate().length > 200 && (biometric.getImageQuality() >= 61 || biometric.getAge() <= 6)) {
+            if (biometric.getTemplate().length > 200 && biometric.getImageQuality() >= 61 ) {
+
+                Set<StoredBiometric> biometricsInFacility = biometricRepository
+                        .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), template);
+
+                if (getMatch(biometricsInFacility, biometric.getTemplate())) {
+                    return this.addMessage(biometric, "Fingerprint already captured");
+                }
+
+
                 byte[] scannedTemplate = biometric.getTemplate();
                 if(biometric.getTemplate() != null && !BiometricStoreDTO.getPatientBiometricStore().isEmpty()) {
                     final List<CapturedBiometricDto> capturedBiometricsListDTO = BiometricStoreDTO
