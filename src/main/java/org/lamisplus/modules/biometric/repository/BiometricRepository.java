@@ -12,10 +12,10 @@ import java.util.Set;
 public interface BiometricRepository extends JpaRepository<Biometric, String> {
     List<Biometric> findAllByPersonUuid(String personUuid);
 
-    @Query(value ="SELECT * FROM biometric WHERE last_modified_date > ?1 AND facility_id=?2 AND archived=?3", nativeQuery = true)
-    public List<Biometric> getBiometricDueForServerUpload(LocalDateTime dateLastSync, Long facilityId, int archived);
+    @Query(value ="SELECT * FROM biometric WHERE last_modified_date > ?1 AND facility_id=?2", nativeQuery = true)
+    public List<Biometric> getAllDueForServerUpload(LocalDateTime dateLastSync, Long facilityId);
 
-    List<Biometric> findAllByFacilityIdAndArchived(Long facilityId, int archived);
+    List<Biometric> findAllByFacilityId(Long facilityId);
 
     @Query(value="SELECT person_uuid, id, (CASE template_type WHEN 'Right Middle Finger' THEN template END) AS rightMiddleFinger,  \n" +
             "    (CASE template_type WHEN 'Right Thumb' THEN template END) AS rightThumb, \n" +
