@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface BiometricRepository extends JpaRepository<Biometric, String> {
@@ -27,7 +28,7 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
             "\t(CASE template_type WHEN 'Left Thumb' THEN template END) AS leftThumb,\n" +
             "\t(CASE template_type WHEN 'Left Ring Finger' THEN template END) AS leftRingFinger,\n" +
             "\t(CASE template_type WHEN 'Left Little Finger' THEN template END) AS leftLittleFinger\t\n" +
-            "\tFrom biometric WHERE facility_id=?1 AND ENCODE(CAST(template AS BYTEA), 'hex') LIKE ?2 Group By person_uuid, id", nativeQuery = true)
+            "\tFrom biometric WHERE facility_id=?1 AND ENCODE(CAST(template AS BYTEA), 'hex') LIKE ?2 AND archived=0 Group By person_uuid, id", nativeQuery = true)
     Set<StoredBiometric> findByFacilityIdWithTemplate();
 
 
@@ -41,7 +42,10 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
             "            string_agg((CASE template_type WHEN 'Left Thumb' THEN template END), '') AS leftThumb, \n" +
             "            string_agg((CASE template_type WHEN 'Left Ring Finger' THEN template END), '') AS leftRingFinger, \n" +
             "            string_agg((CASE template_type WHEN 'Left Little Finger' THEN template END), '') AS leftLittleFinger \n" +
-            "            From biometric WHERE facility_id=?1 AND ENCODE(CAST(template AS BYTEA), 'hex') LIKE ?2 Group By person_uuid", nativeQuery = true)
+            "            From biometric WHERE facility_id=?1 AND ENCODE(CAST(template AS BYTEA), 'hex') LIKE ?2 AND archived=0 Group By person_uuid", nativeQuery = true)
     Set<StoredBiometric> findByFacilityIdWithTemplate(Long facilityId, String template);
 
+
+    @Query(value="SELECT uuid FROM patient_person WHERE id=?1", nativeQuery = true)
+    Optional<String> getPersonUuid(Long patientId);
 }
