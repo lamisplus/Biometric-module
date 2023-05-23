@@ -72,4 +72,19 @@
             INSERT INTO biometric_device(name, url, type, active)VALUES ('Futronic FS80H %231', 'http://localhost:port/api/v1/biometrics/enrollment', 'Futronic', 'false');
         </sql>
     </changeSet>
+
+
+    <changeSet failOnError="false" author="Dr Java" id="biometrics-0001">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM pg_attribute
+                WHERE attrelid = (SELECT oid FROM pg_class WHERE relname = 'biometric')
+                  AND attname = 'image_quality';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE IF EXISTS biometric ADD COLUMN image_quality integer;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
