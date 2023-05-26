@@ -82,6 +82,9 @@ public class Biometric extends BiometricAuditEntity  implements Serializable, Pe
     @Column(name = "hashed")
     private String hashed;
 
+    @Column(name = "count")
+    private Integer count;
+
     @Override
     public boolean isNew() {
         return id == null;
