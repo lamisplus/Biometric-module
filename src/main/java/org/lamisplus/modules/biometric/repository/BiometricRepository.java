@@ -13,6 +13,13 @@ import java.util.Set;
 public interface BiometricRepository extends JpaRepository<Biometric, String> {
     List<Biometric> findAllByPersonUuid(String personUuid);
 
+    @Query(value ="SELECT DISTINCT recapture FROM biometric WHERE person_uuid=?1", nativeQuery = true)
+    List<String> findAllByPersonUuidAndRecaptures(String personUuid);
+
+    @Query(value ="SELECT recapture FROM biometric WHERE person_uuid=?1 ORDER BY id DESC LIMIT 1", nativeQuery = true)
+    Optional<Integer> findMaxRecapture(String personUuid);
+
+    List<Biometric> findAllByPersonUuidAndRecapture(String personUuid, String recapture);
     @Query(value ="SELECT * FROM biometric WHERE last_modified_date > ?1 AND facility_id=?2", nativeQuery = true)
     public List<Biometric> getAllDueForServerUpload(LocalDateTime dateLastSync, Long facilityId);
 
@@ -32,7 +39,7 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     Set<StoredBiometric> findByFacilityIdWithTemplate();
 
 
-    @Query(value="SELECT person_uuid, string_agg((CASE template_type WHEN 'Right Middle Finger' THEN template END), '') AS rightMiddleFinger,   \n" +
+    @Query(value="SELECT person_uuid AS patientId, string_agg((CASE template_type WHEN 'Right Middle Finger' THEN template END), '') AS rightMiddleFinger,   \n" +
             "                string_agg((CASE template_type WHEN 'Right Thumb' THEN template END), '') AS rightThumb,  \n" +
             "            string_agg((CASE template_type WHEN 'Right Index Finger' THEN template END), '') AS rightIndexFinger,  \n" +
             "            string_agg((CASE template_type WHEN 'Right Ring Finger' THEN template END), '') AS rightRingFinger, \n" +

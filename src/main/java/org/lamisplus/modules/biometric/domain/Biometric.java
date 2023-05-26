@@ -71,7 +71,16 @@ public class Biometric extends BiometricAuditEntity  implements Serializable, Pe
     private Boolean versionIso20;
 
     @Column(name = "image_quality")
-    private int imageQuality;
+    private Integer imageQuality=0;
+
+    @Column(name = "recapture")
+    private Integer recapture;
+
+    @Column(name = "recapture_message")
+    private String recaptureMessage;
+
+    @Column(name = "hashed")
+    private String hashed;
 
     @Override
     public boolean isNew() {

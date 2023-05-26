@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.biometric.domain.Biometric;
 import org.lamisplus.modules.biometric.domain.BiometricDevice;
-import org.lamisplus.modules.biometric.domain.dto.BiometricDto;
-import org.lamisplus.modules.biometric.domain.dto.BiometricEnrollmentDto;
-import org.lamisplus.modules.biometric.domain.dto.CaptureRequestDTO;
-import org.lamisplus.modules.biometric.domain.dto.CapturedBiometricDTOS;
+import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.repository.BiometricDeviceRepository;
 import org.lamisplus.modules.biometric.services.BiometricService;
 import org.lamisplus.modules.biometric.services.SecugenService;
@@ -34,6 +31,11 @@ public class BiometricController {
     @GetMapping(BASE_URL_VERSION_ONE + "/patient/{id}")
     public ResponseEntity<CapturedBiometricDTOS> findByPatient(@PathVariable Long id) {
         return ResponseEntity.ok (biometricService.getByPersonId (id));
+    }
+
+    @GetMapping(BASE_URL_VERSION_ONE + "/patients/{id}")
+    public ResponseEntity<CapturedBiometricDTOS> getByPersonIdCapture(@PathVariable Long id) {
+        return ResponseEntity.ok (biometricService.getByPersonIdCapture(id));
     }
     @PostMapping(BASE_URL_VERSION_ONE + "/device")
     public ResponseEntity<BiometricDevice> saveBiometricDevice(@RequestBody BiometricDevice biometricDevice,
