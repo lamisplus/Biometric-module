@@ -222,4 +222,13 @@ public class BiometricService {
                 .orElseThrow(()-> new EntityNotFoundException(Biometric.class,"id:", ""+id));
         biometricRepository.deleteById(biometric.getId());
     }
+
+    /**
+     * Get person biometric a list of groups.
+     * @param personId
+     * @return a List of GroupedCapturedBiometric
+     */
+    public List<GroupedCapturedBiometric> getGroupedCapturedBiometric(Long personId){
+        return biometricRepository.FindAllGroupedPersonBiometric(personId);
+    }
 }

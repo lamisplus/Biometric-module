@@ -81,4 +81,9 @@ public class BiometricController {
     public void deleteBiometrics(@PathVariable String id) {
         biometricService.deleteBiometrics (id);
     }
+
+    @GetMapping(BASE_URL_VERSION_ONE + "/grouped/person/{personId}")
+    public ResponseEntity<List<GroupedCapturedBiometric>> getGroupedCapturedBiometric(@PathVariable Long personId) {
+        return ResponseEntity.ok (biometricService.getGroupedCapturedBiometric(personId));
+    }
 }
