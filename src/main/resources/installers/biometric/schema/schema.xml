@@ -152,4 +152,17 @@
             ALTER TABLE IF EXISTS biometric ADD COLUMN hashed character varying;
         </sql>
     </changeSet>
+
+    <changeSet failOnError="false" author="Dr Java" id="biometrics-0007">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*)
+                FROM pg_attribute
+                WHERE attrelid = (SELECT oid FROM pg_class WHERE relname = 'biometric') AND attname = 'count';
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            ALTER TABLE IF EXISTS biometric ADD COLUMN count integer;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
