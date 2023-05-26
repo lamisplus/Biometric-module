@@ -48,7 +48,8 @@ public class BiometricService {
         List<CapturedBiometricDto> capturedBiometricsList = biometricEnrollmentDto.getCapturedBiometricsList ();
         List<Biometric> biometrics = capturedBiometricsList.stream ()
                 .map (capturedBiometricDto -> convertDtoToEntity (capturedBiometricDto, person, biometricType, deviceName,
-                        reason, biometricEnrollmentDto.getImageQuality(), recap, biometricEnrollmentDto.getRecaptureMessage()))
+                        reason, biometricEnrollmentDto.getImageQuality(),
+                        recap, biometricEnrollmentDto.getRecaptureMessage(), capturedBiometricsList.size()))
                 .collect (Collectors.toList ());
         biometricRepository.saveAll (biometrics);
         return getBiometricDto (biometrics, personId);
@@ -124,7 +125,8 @@ public class BiometricService {
     private Biometric convertDtoToEntity(
             CapturedBiometricDto capturedBiometricDto,
             Person person, String biometricType,
-            String deviceName, String reason, int imageQuality, Integer recapture, String recaptureMessage) {
+            String deviceName, String reason, int imageQuality,
+            Integer recapture, String recaptureMessage, Integer count) {
         Biometric biometric = new Biometric ();
         biometric.setId (UUID.randomUUID ().toString ());
         biometric.setBiometricType (biometricType);
@@ -139,6 +141,7 @@ public class BiometricService {
         biometric.setImageQuality(imageQuality);
         biometric.setRecapture(recapture);
         biometric.setRecaptureMessage(recaptureMessage);
+        biometric.setCount(count);
         Optional<User> userWithRoles = userService.getUserWithRoles ();
         if(userWithRoles.isPresent ()){
             User user = userWithRoles.get ();
