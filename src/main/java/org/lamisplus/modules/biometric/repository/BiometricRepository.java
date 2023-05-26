@@ -55,4 +55,11 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
 
     @Query(value="SELECT uuid FROM patient_person WHERE id=?1", nativeQuery = true)
     Optional<String> getPersonUuid(Long patientId);
+
+    @Query(value="SELECT MAX(b.enrollment_date) AS capture_date, b.person_uuid, b.recapture, b.count, b.archived " +
+            "FROM biometric b " +
+            "INNER JOIN patient_person pp ON pp.uuid=b.person_uuid " +
+            "WHERE pp.id=?1 AND b.archived != 1 AND pp.archived=0 " +
+            "GROUP by b.person_uuid, b.recapture, b.count, b.archived ORDER BY b.recapture DESC", nativeQuery = true)
+    Optional<String> FindAllGroupedPersonBiometric(Long patientId);
 }
