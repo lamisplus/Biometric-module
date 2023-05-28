@@ -166,12 +166,11 @@
         </sql>
     </changeSet>
 
-    <changeSet failOnError="false" author="Dr Java" id="biometrics-0008">
+    <changeSet failOnError="false" author="Dr Java" id="biometrics-00008">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">
-                SELECT COUNT(*)
-                FROM biometric
-                WHERE recapture IS NULL LIMIT 1;
+                SELECT COUNT(t.*) FROM (SELECT person_uuid FROM biometric
+                                        WHERE recapture IS NULL AND archived=0 LIMIT 1) t
             </sqlCheck>
         </preConditions>
         <sql>
@@ -179,7 +178,7 @@
         </sql>
     </changeSet>
 
-    <changeSet failOnError="false" author="Dr Java" id="biometrics-0009">
+    <!--<changeSet failOnError="false" author="Dr Java" id="biometrics-0009">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">
                 SELECT COUNT(*)
@@ -190,6 +189,20 @@
         <sql>
             UPDATE biometric SET count=(SELECT COUNT(person_uuid) FROM biometric WHERE archived=0
                                                                                  GROUP BY person_uuid)
+        </sql>
+    </changeSet>-->
+
+    <changeSet failOnError="false" author="Dr Java" id="biometrics-0010">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(t.*) FROM (SELECT person_uuid FROM biometric
+                                        WHERE count IS NULL AND archived=0 LIMIT 1) t
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            UPDATE biometric b SET count=t.count
+                FROM (SELECT person_uuid, COUNT(person_uuid) FROM biometric WHERE archived=0 GROUP BY person_uuid) t
+            WHERE b.archived=0 AND b.person_uuid=t.person_uuid;
         </sql>
     </changeSet>
 </databaseChangeLog>
