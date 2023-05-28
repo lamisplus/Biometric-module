@@ -5,14 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.biometric.domain.Biometric;
 import org.lamisplus.modules.biometric.domain.BiometricDevice;
 import org.lamisplus.modules.biometric.domain.dto.*;
-import org.lamisplus.modules.biometric.repository.BiometricDeviceRepository;
 import org.lamisplus.modules.biometric.services.BiometricService;
 import org.lamisplus.modules.biometric.services.SecugenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j

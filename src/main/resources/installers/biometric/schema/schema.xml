@@ -165,4 +165,31 @@
             ALTER TABLE IF EXISTS biometric ADD COLUMN count integer;
         </sql>
     </changeSet>
+
+    <changeSet failOnError="false" author="Dr Java" id="biometrics-0008">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*)
+                FROM biometric
+                WHERE recapture IS NULL LIMIT 1;
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            UPDATE biometric SET recapture=0;
+        </sql>
+    </changeSet>
+
+    <changeSet failOnError="false" author="Dr Java" id="biometrics-0009">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*)
+                FROM biometric
+                WHERE count IS NULL LIMIT 1;
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            UPDATE biometric SET count=(SELECT COUNT(person_uuid) FROM biometric WHERE archived=0
+                                                                                 GROUP BY person_uuid)
+        </sql>
+    </changeSet>
 </databaseChangeLog>

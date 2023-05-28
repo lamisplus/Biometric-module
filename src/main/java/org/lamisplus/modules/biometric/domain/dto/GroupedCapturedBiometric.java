@@ -1,7 +1,9 @@
 package org.lamisplus.modules.biometric.domain.dto;
 
+import java.time.LocalDate;
+
 public interface GroupedCapturedBiometric {
-    Integer getCaptureDate();
+    LocalDate getCaptureDate();
     String getPersonUuid();
     Integer getRecapture();
     Integer getCount();

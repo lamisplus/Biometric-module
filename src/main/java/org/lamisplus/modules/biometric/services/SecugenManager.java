@@ -23,9 +23,7 @@ import static SecuGen.FDxSDKPro.jni.SGPPPortAddr.USB_AUTO_DETECT;
 @Data
 @Service
 public class SecugenManager {
-
     public static final int QUALITY = 61;
-
     public static final int AGE = 6;
     private JSGFPLib sgfplib;
     private SGDeviceInfoParam deviceInfo;

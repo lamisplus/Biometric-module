@@ -229,6 +229,8 @@ public class BiometricService {
      * @return a List of GroupedCapturedBiometric
      */
     public List<GroupedCapturedBiometric> getGroupedCapturedBiometric(Long personId){
-        return biometricRepository.FindAllGroupedPersonBiometric(personId);
+        List<GroupedCapturedBiometric> groupedCapturedBiometrics = biometricRepository.getGroupedPersonBiometric(personId);
+        LOG.info("Size is {}", groupedCapturedBiometrics.size());
+        return groupedCapturedBiometrics;
     }
 }
