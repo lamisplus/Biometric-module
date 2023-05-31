@@ -22,7 +22,7 @@ public class BiometricEnrollmentDto implements Serializable {
     @NotBlank(message = "biometricType is mandatory")
     private String biometricType;
     public enum Type {ERROR, SUCCESS, WARNING}
-    private Type type;
+    private Type type=null;
     private boolean iso;
     private int imageHeight;
     private int imageWeight;

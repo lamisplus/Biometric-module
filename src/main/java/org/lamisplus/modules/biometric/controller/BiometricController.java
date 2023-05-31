@@ -64,6 +64,12 @@ public class BiometricController {
     public ResponseEntity<List<Biometric>> getAllPersonBiometric(@PathVariable Long personId) {
         return ResponseEntity.ok (biometricService.getAllPersonBiometric(personId));
     }
+
+    @GetMapping(BASE_URL_VERSION_ONE)
+    public ResponseEntity<List<Biometric>> getAllPersonBiometric( @RequestParam String personUuid,
+                                                                  @RequestParam Integer recapture) {
+        return ResponseEntity.ok (biometricService.getBiometricsByPersonUuidAndRecapture(personUuid, recapture));
+    }
     @PostMapping(BASE_URL_VERSION_ONE + "/store-list/{personId}")
     public ResponseEntity<Boolean> clearStoreList(@PathVariable Long personId) {
         return ResponseEntity.ok (secugenService.emptyStoreByPersonId(personId));
@@ -82,5 +88,11 @@ public class BiometricController {
     @GetMapping(BASE_URL_VERSION_ONE + "/grouped/person/{personId}")
     public ResponseEntity<List<GroupedCapturedBiometric>> getGroupedCapturedBiometric(@PathVariable Long personId) {
         return ResponseEntity.ok (biometricService.getGroupedCapturedBiometric(personId));
+    }
+
+    @DeleteMapping(BASE_URL_VERSION_ONE)
+    public void removeTemplateType(@RequestParam Long personId,
+                                   @RequestParam String templateType) {
+        biometricService.removeTemplateType(personId, templateType);
     }
 }

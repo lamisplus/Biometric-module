@@ -54,7 +54,6 @@ public class SecugenController {
         return secugenService.enrollment(reader, isNew, recapture, captureRequestDTO);
     }
 
-
     @PostMapping(BIOMETRICS_URL_VERSION_ONE + "/enrollment2")
     public BiometricEnrollmentDto enrollment2(@RequestParam String reader,
                                               @Valid @RequestBody CaptureRequestDTO captureRequestDTO) {

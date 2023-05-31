@@ -8,6 +8,7 @@ import org.lamisplus.modules.biometric.repository.BiometricRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -22,7 +23,7 @@ public class SecugenService {
     public static final int PAGE_SIZE = 2000;
     public static Integer totalPage=0;
     public static final String WARNING = "WARNING";
-    public static final String RECAPTURE_MESSAGE = "No baseline biometrics for recapturing";
+    public static final String RECAPTURE_MESSAGE = "No baseline biometrics for recapturing\nFingerprint exist but not same patient";
     public static final String FINGERPRINT_ALREADY_CAPTURED = "Fingerprint already captured";
     public static final int IMAGE_QUALITY = 61;
     private final SecugenManager secugenManager;
@@ -41,6 +42,7 @@ public class SecugenService {
             biometric.setType(BiometricEnrollmentDto.Type.ERROR);
             return biometric;
         }
+
         biometric.setDeviceName(reader);
         biometric.getMessage().put("STARTED CAPTURING", "PROCEEDING...");
         Long error = secugenManager.boot(secugenManager.getDeviceId(reader));
@@ -62,16 +64,13 @@ public class SecugenService {
 
             AtomicReference<Boolean> matched = new AtomicReference<>(false);
             if (biometric.getTemplate().length > 200 && biometric.getImageQuality() >= IMAGE_QUALITY ) {
-
-                /*Set<StoredBiometric> biometricsInFacility = biometricRepository
+                //Boolean match = pageTemplate(template, biometric.getTemplate());
+                Set<StoredBiometric> biometricsInFacility = biometricRepository
                         .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), template);
-
-                Boolean match = getMatch(biometricsInFacility, biometric.getTemplate());*/
-                Boolean match = pageTemplate(template, biometric.getTemplate());
-                Optional<String> optionalPersonUuid = biometricRepository.getPersonUuid(captureRequestDTO.getPatientId());
+                Boolean match = getMatch(biometricsInFacility, biometric.getTemplate());
+                Optional<String> optionalPersonUuid= biometricRepository.getPersonUuid(captureRequestDTO.getPatientId());
 
                 if (match) {
-                    //LOG.info("matched {}", match);
                     if(recapture) {
                         //if recapture and different patient
                         if (MATCHED_PERSON_UUID != null && !MATCHED_PERSON_UUID.equals(optionalPersonUuid.get())) {
@@ -85,9 +84,8 @@ public class SecugenService {
                 //recapture but no match found
                 if(recapture && !match) {
                     this.addMessage(WARNING, biometric, RECAPTURE_MESSAGE);
+                    biometric.setType(BiometricEnrollmentDto.Type.WARNING);
                 }
-
-
                 byte[] scannedTemplate = biometric.getTemplate();
                 if(biometric.getTemplate() != null && !BiometricStoreDTO.getPatientBiometricStore().isEmpty()) {
                     final List<CapturedBiometricDto> capturedBiometricsListDTO = BiometricStoreDTO
@@ -107,10 +105,13 @@ public class SecugenService {
                     biometric.setCapturedBiometricsList(new ArrayList<>());
                 }
                 biometric.getMessage().put("CAPTURING", "PROCEEDING...");
-                biometric.setType(BiometricEnrollmentDto.Type.SUCCESS);
+                if(biometric.getType() == null) {
+                    biometric.setType(BiometricEnrollmentDto.Type.SUCCESS);
+                }
                 CapturedBiometricDto capturedBiometrics = new CapturedBiometricDto();
                 capturedBiometrics.setTemplate(scannedTemplate);
                 capturedBiometrics.setTemplateType(biometric.getTemplateType());
+                capturedBiometrics.setHashed(bcryptHash(biometric.getTemplate()));
 
                 List<CapturedBiometricDto> capturedBiometricsList =
                         BiometricStoreDTO.addCapturedBiometrics(biometric.getPatientId(), capturedBiometrics)
@@ -174,6 +175,7 @@ public class SecugenService {
         return hasCleared;
     }
 
+
     public Boolean getMatch(Set<StoredBiometric> storedBiometrics, byte[] scannedTemplate) {
         Boolean matched = Boolean.FALSE;
         for (StoredBiometric biometric : storedBiometrics) {
@@ -214,24 +216,42 @@ public class SecugenService {
      * @param template
      * @return a Boolean for match
      */
-    private Boolean pageTemplate(String firstTwoChar, byte[] template){
+    //TODO: Sort this out
+    /*private Boolean pageTemplate(String firstTwoChar, byte[] template){
         Boolean match=Boolean.FALSE;
+        LOG.info("STARTED page template", match);
         for(int pageNo=0; pageNo <= totalPage; ++pageNo) {
             if (totalPage == 0) {
                 Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE);
+                LOG.info("totalPage {}", totalPage);
                 Page<StoredBiometric> biometricsInFacility = biometricRepository
                         .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), firstTwoChar, pageable);
                 totalPage = biometricsInFacility.getTotalPages();
+                LOG.info("totalPage now {}", totalPage);
                 match = getMatch(biometricsInFacility.toSet(), template);
             } else {
+                LOG.info("totalPage else 1 ");
                 Page<StoredBiometric> biometricsInFacility = biometricRepository
                         .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), firstTwoChar, PageRequest.of(pageNo, PAGE_SIZE));
                 match = getMatch(biometricsInFacility.toSet(), template);
+                LOG.info("totalPage else 2 {}", totalPage);
             }
             if(match)break;
         }
         totalPage=0;
+        LOG.info("totalPage reset {}", match);
         return match;
 
+    }*/
+
+    /**
+     * Get person biometric by person uuid and recapture.
+     * @param template
+     * @return a hashed value of the base 64 template
+     */
+    public String bcryptHash(byte[] template) {
+
+        String encoded = Base64.getEncoder().encodeToString(template);
+        return BCrypt.hashpw(encoded, BCrypt.gensalt("$2a$12$MklNDNgs4Agd50cSasj91O"));
     }
 }

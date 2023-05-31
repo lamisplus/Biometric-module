@@ -17,7 +17,7 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     List<Biometric> findAllByPersonUuid(String personUuid);
 
     @Query(value ="SELECT DISTINCT recapture FROM biometric WHERE person_uuid=?1", nativeQuery = true)
-    List<String> findAllByPersonUuidAndRecaptures(String personUuid);
+    List<String> findRecapturesByPersonUuidAndRecaptures(String personUuid);
 
     @Query(value ="SELECT recapture FROM biometric WHERE person_uuid=?1 ORDER BY id DESC LIMIT 1", nativeQuery = true)
     Optional<Integer> findMaxRecapture(String personUuid);
@@ -74,12 +74,14 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     @Query(value="SELECT uuid FROM patient_person WHERE id=?1", nativeQuery = true)
     Optional<String> getPersonUuid(Long patientId);
 
-    @Query(value="SELECT DISTINCT (b.recapture) AS recapture,\n" +
-            "b.enrollment_date AS captureDate, b.person_uuid AS personUuid, \n" +
-            "b.count, b.archived\n" +
-            "FROM biometric b\n" +
-            "INNER JOIN patient_person pp ON pp.uuid=b.person_uuid\n" +
-            "WHERE pp.id=?1 AND b.archived != 1 AND pp.archived=0\n" +
+    @Query(value="SELECT DISTINCT (b.recapture) AS recapture, " +
+            "b.enrollment_date AS captureDate, b.person_uuid AS personUuid, " +
+            "b.count, b.archived " +
+            "FROM biometric b " +
+            "INNER JOIN patient_person pp ON pp.uuid=b.person_uuid " +
+            "WHERE pp.id=?1 AND b.archived != 1 AND pp.archived=0 " +
             "ORDER BY recapture DESC", nativeQuery = true)
     List<GroupedCapturedBiometric> getGroupedPersonBiometric(Long patientId);
+    
+    List<Biometric> findAllByPersonUuidAndRecapture(String personUuid, Integer recapture);
 }

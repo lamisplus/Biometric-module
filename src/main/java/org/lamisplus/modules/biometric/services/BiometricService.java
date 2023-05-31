@@ -69,7 +69,7 @@ public class BiometricService {
     public CapturedBiometricDTOS getByPersonIdCapture(Long personId) {
         Person person = personRepository.findById (personId)
                 .orElseThrow (()-> new EntityNotFoundException (Person.class, "Id", ""+personId));
-        List<String> recaptures = biometricRepository.findAllByPersonUuidAndRecaptures(person.getUuid ());
+        List<String> recaptures = biometricRepository.findRecapturesByPersonUuidAndRecaptures(person.getUuid ());
         return getCapturedBiometrics(recaptures, person.getUuid());
     }
 
@@ -84,6 +84,7 @@ public class BiometricService {
         CapturedBiometricDto capturedBiometricDto = new CapturedBiometricDto();
         capturedBiometricDto.setTemplate(biometric.getTemplate());
         capturedBiometricDto.setTemplateType(biometric.getTemplateType());
+        if(biometric.getHashed() != null)capturedBiometricDto.setHashed(biometric.getHashed());
         capturedBiometricDtos.getCapturedBiometricsList().add(capturedBiometricDto);
 
         return capturedBiometricDtos;
@@ -101,6 +102,7 @@ public class BiometricService {
                     .forEach(biometric1 -> {
                         capturedBiometricDto.setTemplate(biometric1.getTemplate());
                         capturedBiometricDto.setTemplateType(biometric1.getTemplateType());
+                        if(biometric1.getHashed() != null)capturedBiometricDto.setHashed(biometric1.getHashed());
                         capturedBiometrics.add(capturedBiometricDto);
                     });
             capturedBiometricsList.add(capturedBiometrics);
@@ -133,6 +135,7 @@ public class BiometricService {
         biometric.setDeviceName (deviceName);
         biometric.setTemplate (capturedBiometricDto.getTemplate ());
         biometric.setTemplateType (capturedBiometricDto.getTemplateType ());
+        if(capturedBiometricDto.getHashed() != null)biometric.setHashed(capturedBiometricDto.getHashed());
         biometric.setDate (LocalDate.now ());
         biometric.setIso (true);
         biometric.setReason(reason);
@@ -233,4 +236,44 @@ public class BiometricService {
         LOG.info("Size is {}", groupedCapturedBiometrics.size());
         return groupedCapturedBiometrics;
     }
+
+    /**
+     * Get person biometric by person uuid and recapture.
+     * @param personUuid
+     * @param recapture
+     * @return a List of a person Biometric for a specific captured instance
+     */
+    public List<Biometric> getBiometricsByPersonUuidAndRecapture(String personUuid, Integer recapture) {
+        List<Biometric> personBiometrics = biometricRepository.findAllByPersonUuidAndRecapture(personUuid, recapture);
+        return personBiometrics;
+    }
+
+    /**
+     * Removes a specific template type (finger) from the list of capture biometric.
+     * @param personId
+     * @param templateType
+     * @return nothing (void)
+     */
+    public void removeTemplateType(Long personId, String templateType){
+        //Checking if the person exist in the list
+        if(!BiometricStoreDTO.getPatientBiometricStore().isEmpty() && BiometricStoreDTO.getPatientBiometricStore().get(personId) != null){
+
+            //removes the specific finger or template type
+            final List<CapturedBiometricDto> capturedBiometricsListDTO = BiometricStoreDTO
+                    .getPatientBiometricStore()
+                    .values()
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toList())
+                    .stream()
+                    .filter(c->!c.getTemplateType().equals(templateType))
+                    .collect(Collectors.toList());
+
+            //removes the person
+            BiometricStoreDTO.getPatientBiometricStore().remove(personId);
+            //fills the list with the specific finger or template type removed
+            BiometricStoreDTO.getPatientBiometricStore().put(personId, capturedBiometricsListDTO);
+        }
+    }
+
 }
