@@ -157,7 +157,7 @@ public class SecugenService {
         int imageQuality = biometricEnrollmentDto.getImageQuality();
         int templateLength = biometricEnrollmentDto.getTemplate().length;
         biometricEnrollmentDto.getMessage().put(messageKey, "ERROR WHILE CAPTURING... " +
-                "\nImage Quality: " + (imageQuality < 65 ? "Bad - " + imageQuality : "Good - " + imageQuality) +
+                "\nImage Quality: " + (imageQuality < 61 ? "Bad - " + imageQuality : "Good - " + imageQuality) +
                 "\nTemplate Length: " + (templateLength < 200 ? "Bad - " + templateLength : "Good - " + templateLength) +
                 "\n" + (customMessage != null ? customMessage : "")
         );

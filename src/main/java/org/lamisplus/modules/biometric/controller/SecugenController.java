@@ -31,6 +31,10 @@ public class SecugenController {
     private final String BIOMETRICS_URL_VERSION_ONE = "/api/v1/biometrics";
     private final SecugenManager secugenManager;
 
+    @PostMapping(BIOMETRICS_URL_VERSION_ONE + "/store-list/{personId}")
+    public ResponseEntity<Boolean> clearStoreList(@PathVariable Long personId) {
+        return ResponseEntity.ok (secugenService.emptyStoreByPersonId(personId));
+    }
 
     @GetMapping(BIOMETRICS_URL_VERSION_ONE + "/server")
     public String getServerUrl() {

@@ -6,7 +6,6 @@ import org.lamisplus.modules.biometric.domain.Biometric;
 import org.lamisplus.modules.biometric.domain.BiometricDevice;
 import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.services.BiometricService;
-import org.lamisplus.modules.biometric.services.SecugenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BiometricController {
     private final BiometricService biometricService;
-    //private final BiometricDeviceRepository biometricDeviceRepository;
-    private final SecugenService secugenService;
     //Versioning through URI Path
     private final String BASE_URL_VERSION_ONE = "/api/v1/biometrics";
     @PostMapping(BASE_URL_VERSION_ONE + "/templates")
@@ -70,10 +67,7 @@ public class BiometricController {
                                                                   @RequestParam Integer recapture) {
         return ResponseEntity.ok (biometricService.getBiometricsByPersonUuidAndRecapture(personUuid, recapture));
     }
-    @PostMapping(BASE_URL_VERSION_ONE + "/store-list/{personId}")
-    public ResponseEntity<Boolean> clearStoreList(@PathVariable Long personId) {
-        return ResponseEntity.ok (secugenService.emptyStoreByPersonId(personId));
-    }
+
     @DeleteMapping(BASE_URL_VERSION_ONE + "/person/{personId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAllPersonBiometrics(@PathVariable Long personId) {
