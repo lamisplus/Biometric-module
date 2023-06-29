@@ -28,7 +28,7 @@ public class BiometricEnrollmentDto implements Serializable {
     private int imageWeight;
     private int imageResolution;
     private int matchingScore;
-    private Integer imageQuality=0;
+    private Integer mainImageQuality=0;
     private byte[] image;
     private String reason;
     private int age;

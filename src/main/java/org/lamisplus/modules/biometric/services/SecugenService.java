@@ -5,9 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.enumeration.ErrorCode;
 import org.lamisplus.modules.biometric.repository.BiometricRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +27,15 @@ public class SecugenService {
     private final BiometricRepository biometricRepository;
     private final CurrentUserOrganizationService facility;
     public static String MATCHED_PERSON_UUID;
+
+    /**
+     * Biometric enrollment
+     * @param reader
+     * @param isNew
+     * @param recapture
+     * @param captureRequestDTO
+     * @return BiometricEnrollmentDto
+     */
     public BiometricEnrollmentDto enrollment(String reader, Boolean isNew, Boolean recapture, CaptureRequestDTO captureRequestDTO){
         if(isNew){
             this.emptyStoreByPersonId(captureRequestDTO.getPatientId());
@@ -63,7 +69,7 @@ public class SecugenService {
             });
 
             AtomicReference<Boolean> matched = new AtomicReference<>(false);
-            if (biometric.getTemplate().length > 200 && biometric.getImageQuality() >= IMAGE_QUALITY ) {
+            if (biometric.getTemplate().length > 200 && biometric.getMainImageQuality() >= IMAGE_QUALITY ) {
                 Set<StoredBiometric> biometricsInFacility = biometricRepository
                         .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), template);
                 Boolean match = getMatch(biometricsInFacility, biometric.getTemplate());
@@ -110,6 +116,7 @@ public class SecugenService {
                 capturedBiometrics.setTemplate(scannedTemplate);
                 capturedBiometrics.setTemplateType(biometric.getTemplateType());
                 capturedBiometrics.setHashed(bcryptHash(biometric.getTemplate()));
+                capturedBiometrics.setImageQuality(biometric.getMainImageQuality());
 
                 List<CapturedBiometricDto> capturedBiometricsList =
                         BiometricStoreDTO.addCapturedBiometrics(biometric.getPatientId(), capturedBiometrics)
@@ -154,7 +161,7 @@ public class SecugenService {
         return biometricEnrollmentDto;
     }
     private BiometricEnrollmentDto addMessage(String messageKey,BiometricEnrollmentDto biometricEnrollmentDto, String customMessage){
-        int imageQuality = biometricEnrollmentDto.getImageQuality();
+        int imageQuality = biometricEnrollmentDto.getMainImageQuality();
         int templateLength = biometricEnrollmentDto.getTemplate().length;
         biometricEnrollmentDto.getMessage().put(messageKey, "ERROR WHILE CAPTURING... " +
                 "\nImage Quality: " + (imageQuality < 61 ? "Bad - " + imageQuality : "Good - " + imageQuality) +
@@ -207,6 +214,7 @@ public class SecugenService {
         Boolean matched = Boolean.FALSE;
         for (StoredBiometric biometric : storedBiometrics) {
             MATCHED_PERSON_UUID = biometric.getPersonUuid();
+            LOG.info("person biometric is {}", MATCHED_PERSON_UUID);
             if (biometric.getLeftIndexFinger() != null && biometric.getLeftIndexFinger().length != 0) {
                 matched = secugenManager.matchTemplate(biometric.getLeftIndexFinger(), scannedTemplate);
             } else if (biometric.getLeftMiddleFinger() != null && biometric.getLeftMiddleFinger().length != 0) {

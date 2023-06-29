@@ -6,7 +6,7 @@
 
     <property name="autoIncrement" value="true"/>
 
-    <changeSet id="20220306-006" author="amos-data-fi">
+    <changeSet id="20220306-0006" author="amos-data-fi">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="biometric"/>

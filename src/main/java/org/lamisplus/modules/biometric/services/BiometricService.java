@@ -48,7 +48,7 @@ public class BiometricService {
         List<CapturedBiometricDto> capturedBiometricsList = biometricEnrollmentDto.getCapturedBiometricsList ();
         List<Biometric> biometrics = capturedBiometricsList.stream ()
                 .map (capturedBiometricDto -> convertDtoToEntity (capturedBiometricDto, person, biometricType, deviceName,
-                        reason, biometricEnrollmentDto.getImageQuality(),
+                        reason, capturedBiometricDto.getImageQuality(),
                         recap, biometricEnrollmentDto.getRecaptureMessage(), capturedBiometricsList.size()))
                 .collect (Collectors.toList ());
         biometricRepository.saveAll (biometrics);
@@ -85,6 +85,7 @@ public class BiometricService {
         capturedBiometricDto.setTemplate(biometric.getTemplate());
         capturedBiometricDto.setTemplateType(biometric.getTemplateType());
         if(biometric.getHashed() != null)capturedBiometricDto.setHashed(biometric.getHashed());
+        capturedBiometricDto.setImageQuality(biometric.getImageQuality());
         capturedBiometricDtos.getCapturedBiometricsList().add(capturedBiometricDto);
 
         return capturedBiometricDtos;
@@ -102,6 +103,7 @@ public class BiometricService {
                     .forEach(biometric1 -> {
                         capturedBiometricDto.setTemplate(biometric1.getTemplate());
                         capturedBiometricDto.setTemplateType(biometric1.getTemplateType());
+                        capturedBiometricDto.setImageQuality(biometric1.getImageQuality());
                         if(biometric1.getHashed() != null)capturedBiometricDto.setHashed(biometric1.getHashed());
                         capturedBiometrics.add(capturedBiometricDto);
                     });
