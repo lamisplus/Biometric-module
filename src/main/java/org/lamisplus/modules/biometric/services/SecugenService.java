@@ -287,8 +287,7 @@ public class SecugenService {
      * @return a hashed value of the base 64 template
      */
     public String bcryptHash(byte[] template) {
-
         String encoded = Base64.getEncoder().encodeToString(template);
-        return BCrypt.hashpw(encoded, BCrypt.gensalt("$2a$12$MklNDNgs4Agd50cSasj91O"));
+        return BCrypt.hashpw(encoded, "$2a$12$MklNDNgs4Agd50cSasj91O");
     }
 }
