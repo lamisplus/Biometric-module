@@ -37,8 +37,6 @@ public class BiometricAuditEntity {
     @CreatedDate
     private LocalDateTime createdDate = LocalDateTime.now ();
 
-    @JsonIgnore
-    @ToString.Exclude
     @Column(name = "created_by", updatable = false)
     private String createdBy = SecurityUtils.getCurrentUserLogin ().orElse ("");
 
@@ -49,8 +47,6 @@ public class BiometricAuditEntity {
 
 
     @Column(name = "last_modified_by")
-    @JsonIgnore
-    @ToString.Exclude
     private String lastModifiedBy = SecurityUtils.getCurrentUserLogin ().orElse ("");
 
     private Long facilityId;

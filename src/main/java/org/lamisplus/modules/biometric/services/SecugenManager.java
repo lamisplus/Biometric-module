@@ -23,7 +23,8 @@ import static SecuGen.FDxSDKPro.jni.SGPPPortAddr.USB_AUTO_DETECT;
 @Data
 @Service
 public class SecugenManager {
-
+    public static final int QUALITY = 61;
+    public static final int AGE = 6;
     private JSGFPLib sgfplib;
     private SGDeviceInfoParam deviceInfo;
     private Long error;
@@ -197,11 +198,16 @@ public class SecugenManager {
      */
     public Boolean matchTemplate(byte[] template1, byte[] template2) {
         boolean[] matched = new boolean[1];
-        long sl = SGFDxSecurityLevel.SL_NORMAL;
-        if ( (template1.length - template2.length) > 200){
-            return false;
+        try {
+            long sl = SGFDxSecurityLevel.SL_NORMAL;
+            if ((template1.length - template2.length) > 200) {
+                return false;
+            }
+            error = this.sgfplib.MatchTemplate(template1, template2, sl, matched);
+            //System.out.println("ERROR RATE: "+error +" " +" MATCHED: " + matched[0]);
+        }catch(Exception ex){
+            ex.printStackTrace();
         }
-        error = this.sgfplib.MatchTemplate(template1, template2, sl, matched);
         return matched[0];
     }
     
@@ -232,9 +238,9 @@ public class SecugenManager {
                     iError = this.sgfplib.GetMatchingScore(regTemplate, regTemplate2, score);
                     if (iError == SGFDxErrorCode.SGFDX_ERROR_NONE) {
                         biometric.setMatchingScore(score[0]);
-                        if (score[0] >= 80) {   // Enroll these fingerprints to database
+                        if (score[0] >= QUALITY || biometric.getAge() <= AGE ) {   // Enroll these fingerprints to database
                             biometric.setImage(imageQuality > imageQuality2 ? imageBuffer : imageBuffer2);
-                            biometric.setImageQuality(imageQuality > imageQuality2 ? imageQuality : imageQuality2);
+                            biometric.setMainImageQuality(imageQuality > imageQuality2 ? imageQuality : imageQuality2);
                             biometric.setTemplate(imageQuality > imageQuality2 ? regTemplate : regTemplate2);
                             biometric.setImageWeight(deviceInfo.imageWidth);
                             biometric.setImageHeight(deviceInfo.imageHeight);

@@ -6,4 +6,6 @@ import lombok.Data;
 public class CapturedBiometricDto {
     private String templateType;
     private byte[] template;
+    private String hashed;
+    private Integer imageQuality;
 }
