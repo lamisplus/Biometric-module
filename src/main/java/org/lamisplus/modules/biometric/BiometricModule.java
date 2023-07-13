@@ -44,45 +44,4 @@ public class BiometricModule extends AcrossModule {
 	public String getName() {
 		return  NAME;
 	}
-
-	@Bean
-	public void addDependencies(){
-		URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-		Class clazz= URLClassLoader.class;
-
-		// Use reflection
-		Method method= null;
-		try {
-			method = clazz.getDeclaredMethod("addURL", URL.class);
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		}
-		if (method != null) {
-			method.setAccessible(true);
-		}
-
-
-		ArrayList<String> jarFileList = new ArrayList<>();
-		jarFileList.add(modulePath + File.separator + "FDxSDKPro-1.0.jar");
-		for(String jar : jarFileList){
-			File f = new File(jar);
-			if(!f.exists()){
-				try {
-					throw new Exception("File [" + jar + "] doesn't exist!");
-				} catch (Exception e) {
-					LOG.info("File [" + jar + "] doesn't exist!");
-					e.printStackTrace();
-				}
-			}
-
-			System.out.println("Adding jar [" + jar + "]");
-			try {
-				if (method != null) {
-					method.invoke(classLoader, f.toURI());
-				}
-			} catch (IllegalAccessException | InvocationTargetException e) {
-				e.printStackTrace();
-			}
-		}
-	}
 }

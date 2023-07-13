@@ -12,22 +12,82 @@ import SaveIcon from "@material-ui/icons/Save";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { token as token, url as baseUrl } from "./../../../api";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
+    card: {
+        margin: theme.spacing(20),
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center"
+    },
+    form: {
+        width: "100%", // Fix IE 11 issue.
+        marginTop: theme.spacing(3),
+    },
+    submit: {
+        margin: theme.spacing(3, 0, 2),
+    },
+    cardBottom: {
+        marginBottom: 20,
+    },
+    Select: {
+        height: 45,
+        width: 300,
+    },
     button: {
-        margin: theme.spacing(1)
+        margin: theme.spacing(1),
     },
-    error: {
-        color: "#f85032",
-        fontSize: "12.8px",
+    root: {
+        '& > *': {
+            margin: theme.spacing(1)
+        },
+        "& .card-title":{
+            color:'#fff',
+            fontWeight:'bold'
+        },
+        "& .form-control":{
+            borderRadius:'0.25rem',
+            height:'41px'
+        },
+        "& .card-header:first-child": {
+            borderRadius: "calc(0.25rem - 1px) calc(0.25rem - 1px) 0 0"
+        },
+        "& .dropdown-toggle::after": {
+            display: " block !important"
+        },
+        "& select":{
+            "-webkit-appearance": "listbox !important"
+        },
+        "& p":{
+            color:'red'
+        },
+        "& label":{
+            fontSize:'14px',
+            color:'#014d88',
+            fontWeight:'bold'
+        }
     },
-}))
+    demo: {
+        backgroundColor: theme.palette.background.default,
+    },
+    inline: {
+        display: "inline",
+    },
+    error:{
+        color: '#f85032',
+        fontSize: '12.8px'
+    },
+    success: {
+        color: "#4BB543 ",
+        fontSize: "11px",
+    },
+}));
 
 const AddBiometricDevice = (props) => {
     const classes = useStyles()
     const [loading, setLoading] = useState(false)
     const datasample = props.datasample ? props.datasample : {};
     const [errors, setErrors] = useState({});
-    const [details, setDetails] =  useState({ active: "", name:"", url:"", })
+    const [details, setDetails] =  useState({ active: "", name:"", url:"", port:"", type:"" })
      
     const handleOtherFieldInputChange = e => {
         setDetails ({ ...details, [e.target.name]: e.target.value });
@@ -61,6 +121,7 @@ const AddBiometricDevice = (props) => {
             .then((response) => { 
                 props.loadBiometricDevices()               
                 toast.success("Biometric Device Added Successfully!")
+                setDetails({active: "", name:"", url:"", port:"", type:""})
                 props.togglestatus()                  
             })
             .catch((error) => { 
@@ -84,22 +145,23 @@ const AddBiometricDevice = (props) => {
                 <Modal.Body>
      
                     <div className="col-md-12 col-md-12">
-                        <div className="card">
+                        <div className=" card">
 
                             <div className="card-body">
-                                <div className="basic-form">
+                                <div className={classes.root}>
                                     <form onSubmit={(e) => e.preventDefault()}>
                                        
                                         <div className="row">
                                             
                                             <div className="form-group col-md-12">
-                                                <label> Name</label>
+                                                <label> Name *</label>
                                                 <input
                                                     type="text"
                                                     name="name"
                                                     id="name"
                                                     className="form-control"
                                                     value={details.name}
+                                                    style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                                     onChange={handleOtherFieldInputChange}
                                                 />
                                                 {errors.name !=="" ? (
@@ -107,13 +169,14 @@ const AddBiometricDevice = (props) => {
                                                 ) : "" }
                                             </div>
                                             <div className="form-group col-md-12">
-                                                <label>Url</label>
+                                                <label>Url *</label>
                                                 <input
                                                     type="text"
                                                     name="url"
                                                     id="url"
                                                     className="form-control"
                                                     value={details.url}
+                                                    style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                                     onChange={handleOtherFieldInputChange}
                                                     required
                                                 />
@@ -123,18 +186,33 @@ const AddBiometricDevice = (props) => {
                                                 ) : "" }
                                             </div>
                                             <div className="form-group col-md-12">
-                                                <label>Status</label>
-                                                
+                                                <label>Port</label>
+                                                <input
+                                                    type="text"
+                                                    name="port"
+                                                    id="port"
+                                                    className="form-control"
+                                                    value={details.port}
+                                                    onChange={handleOtherFieldInputChange}
+                                                    style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
+                                                    required
+                                                />
+
+                                            </div>
+                                            <div className="form-group col-md-12">
+                                                <label>Default *</label>
                                                 <select
                                                 //defaultValue={"true"}
                                                 name="active"
                                                 id="active"
+                                                value={details.active}
                                                 className="form-control wide"
+                                                style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
                                                 onChange={handleOtherFieldInputChange}
                                                 >  
                                                 <option value=""> Select</option>                                 
-                                                <option value="true"> Active</option>
-                                                <option value="false">Not Active </option>
+                                                <option value="true"> Yes</option>
+                                                <option value="false">No</option>
                                                 </select>
                                                 {errors.active !=="" ? (
                                                     <span className={classes.error}>{errors.active}</span>
@@ -144,6 +222,7 @@ const AddBiometricDevice = (props) => {
                                             {/*Second Row of the Field by Col */}
 
                                         </div>
+                                        <br/>
                                         <MatButton
                                             type='submit'
                                             variant='contained'
@@ -161,8 +240,9 @@ const AddBiometricDevice = (props) => {
                                             variant='contained'
                                             color='default'
                                             onClick={closeModal}
+                                            style={{backgroundColor:'#992E62'}}
                                             startIcon={<CancelIcon />}>
-                                            <span style={{textTransform: 'capitalize'}}>Cancel</span>
+                                            <span style={{textTransform: 'capitalize', color:"#fff" }}>Cancel</span>
                                         </MatButton>
                                     </form>
                                 </div>

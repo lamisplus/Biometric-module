@@ -1,7 +1,7 @@
 basePackage: org.lamisplus.modules.biometric
 name: BiometricModule
 store: true
-dependencies: {PatientModule: 1.0.0}
+dependencies: {}
 menus:
   - icon: fa fa-hand-paper-o
     disabled: false

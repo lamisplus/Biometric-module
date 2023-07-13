@@ -162,7 +162,7 @@ const BiometricList = (props) => {
 
             <Card className={classes.cardBottom}>
                 <CardContent>
-                {permissions.includes('biometric_add_device') || permissions.includes("all_permission") ? (
+
                         <MatButton
                             variant="contained"
                             color="primary"
@@ -174,8 +174,7 @@ const BiometricList = (props) => {
                             &nbsp;&nbsp;
                             <span style={{ textTransform: "lowercase" }}> Device</span>
                         </MatButton>
-                     ):""
-                }
+
                     <br />
 
                     <br />
@@ -186,7 +185,9 @@ const BiometricList = (props) => {
                     //{ title: "Id", field: "id", filtering: false },
                     { title: "Name", field: "name" },
                     { title: "URL", field: "url", filtering: false },
-                    { title: "Status", field: "status", filtering: false },
+                    { title: "Port", field: "port", filtering: false },
+                    { title: "Default", field: "status", filtering: false },
+
                     { title: "Actions", field: "actions", filtering: false },
                 ]}
                 isLoading={loading}
@@ -194,23 +195,19 @@ const BiometricList = (props) => {
                     //id: row.id,
                     name: row.name,
                     url: row.url,
+                    port: row.port,
                     type: row.type,
                     status: row.active===true ? "Active" : "Not Active",
 
                     actions: (
                         <div>
-                           {permissions.includes('biometric_update_device') || permissions.includes("all_permission") ? (
+
                             <Label as='a' color='blue' className="ms-1" size='mini' onClick={() =>  editDevice(row)}>
                                 <Icon name='pencil' /> Edit
                             </Label>
-                            ):""
-                            }
-                            {permissions.includes('biometric_delete_device') || permissions.includes("all_permission") ? (
                             <Label as='a' color='red' onClick={() =>  deleteModal(row)}  size='mini'>
                                 <Icon name='trash' /> Delete
                             </Label>
-                            ):""
-                            }
 
                         </div>
                     ),
