@@ -31,6 +31,10 @@ public class SecugenController {
     private final String BIOMETRICS_URL_VERSION_ONE = "/api/v1/biometrics";
     private final SecugenManager secugenManager;
 
+    @PostMapping(BIOMETRICS_URL_VERSION_ONE + "/store-list/{personId}")
+    public ResponseEntity<Boolean> clearStoreList(@PathVariable Long personId) {
+        return ResponseEntity.ok (secugenService.emptyStoreByPersonId(personId));
+    }
 
     @GetMapping(BIOMETRICS_URL_VERSION_ONE + "/server")
     public String getServerUrl() {
@@ -49,10 +53,10 @@ public class SecugenController {
     @PostMapping(BIOMETRICS_URL_VERSION_ONE + "/enrollment")
     public BiometricEnrollmentDto enrollment(@RequestParam String reader,
                                              @RequestParam(required = false, defaultValue = "false") Boolean isNew,
+                                             @RequestParam(required = false, defaultValue = "false") Boolean recapture,
                                              @Valid @RequestBody CaptureRequestDTO captureRequestDTO) {
-        return secugenService.enrollment(reader, isNew, captureRequestDTO);
+        return secugenService.enrollment(reader, isNew, recapture, captureRequestDTO);
     }
-
 
     @PostMapping(BIOMETRICS_URL_VERSION_ONE + "/enrollment2")
     public BiometricEnrollmentDto enrollment2(@RequestParam String reader,

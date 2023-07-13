@@ -21,15 +21,18 @@ public class BiometricEnrollmentDto implements Serializable {
     private String deviceType;
     @NotBlank(message = "biometricType is mandatory")
     private String biometricType;
-    public enum Type {ERROR, SUCCESS}
-    private Type type;
+    public enum Type {ERROR, SUCCESS, WARNING}
+    private Type type=null;
     private boolean iso;
     private int imageHeight;
     private int imageWeight;
     private int imageResolution;
     private int matchingScore;
-    private int imageQuality;
+    private Integer mainImageQuality=0;
     private byte[] image;
     private String reason;
     private int age;
+    private Integer recapture;
+    private String recaptureMessage;
+    private String hashed;
 }

@@ -23,9 +23,7 @@ import static SecuGen.FDxSDKPro.jni.SGPPPortAddr.USB_AUTO_DETECT;
 @Data
 @Service
 public class SecugenManager {
-
     public static final int QUALITY = 61;
-
     public static final int AGE = 6;
     private JSGFPLib sgfplib;
     private SGDeviceInfoParam deviceInfo;
@@ -242,7 +240,7 @@ public class SecugenManager {
                         biometric.setMatchingScore(score[0]);
                         if (score[0] >= QUALITY || biometric.getAge() <= AGE ) {   // Enroll these fingerprints to database
                             biometric.setImage(imageQuality > imageQuality2 ? imageBuffer : imageBuffer2);
-                            biometric.setImageQuality(imageQuality > imageQuality2 ? imageQuality : imageQuality2);
+                            biometric.setMainImageQuality(imageQuality > imageQuality2 ? imageQuality : imageQuality2);
                             biometric.setTemplate(imageQuality > imageQuality2 ? regTemplate : regTemplate2);
                             biometric.setImageWeight(deviceInfo.imageWidth);
                             biometric.setImageHeight(deviceInfo.imageHeight);

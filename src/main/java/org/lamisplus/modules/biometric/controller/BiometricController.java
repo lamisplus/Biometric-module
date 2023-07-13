@@ -4,18 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.biometric.domain.Biometric;
 import org.lamisplus.modules.biometric.domain.BiometricDevice;
-import org.lamisplus.modules.biometric.domain.dto.BiometricDto;
-import org.lamisplus.modules.biometric.domain.dto.BiometricEnrollmentDto;
-import org.lamisplus.modules.biometric.domain.dto.CaptureRequestDTO;
-import org.lamisplus.modules.biometric.domain.dto.CapturedBiometricDTOS;
-import org.lamisplus.modules.biometric.repository.BiometricDeviceRepository;
+import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.services.BiometricService;
-import org.lamisplus.modules.biometric.services.SecugenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -23,8 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BiometricController {
     private final BiometricService biometricService;
-    //private final BiometricDeviceRepository biometricDeviceRepository;
-    private final SecugenService secugenService;
     //Versioning through URI Path
     private final String BASE_URL_VERSION_ONE = "/api/v1/biometrics";
     @PostMapping(BASE_URL_VERSION_ONE + "/templates")
@@ -34,6 +25,11 @@ public class BiometricController {
     @GetMapping(BASE_URL_VERSION_ONE + "/patient/{id}")
     public ResponseEntity<CapturedBiometricDTOS> findByPatient(@PathVariable Long id) {
         return ResponseEntity.ok (biometricService.getByPersonId (id));
+    }
+
+    @GetMapping(BASE_URL_VERSION_ONE + "/patients/{id}")
+    public ResponseEntity<CapturedBiometricDTOS> getByPersonIdCapture(@PathVariable Long id) {
+        return ResponseEntity.ok (biometricService.getByPersonIdCapture(id));
     }
     @PostMapping(BASE_URL_VERSION_ONE + "/device")
     public ResponseEntity<BiometricDevice> saveBiometricDevice(@RequestBody BiometricDevice biometricDevice,
@@ -65,10 +61,13 @@ public class BiometricController {
     public ResponseEntity<List<Biometric>> getAllPersonBiometric(@PathVariable Long personId) {
         return ResponseEntity.ok (biometricService.getAllPersonBiometric(personId));
     }
-    @PostMapping(BASE_URL_VERSION_ONE + "/store-list/{personId}")
-    public ResponseEntity<Boolean> clearStoreList(@PathVariable Long personId) {
-        return ResponseEntity.ok (secugenService.emptyStoreByPersonId(personId));
+
+    @GetMapping(BASE_URL_VERSION_ONE)
+    public ResponseEntity<List<Biometric>> getAllPersonBiometric( @RequestParam String personUuid,
+                                                                  @RequestParam Integer recapture) {
+        return ResponseEntity.ok (biometricService.getBiometricsByPersonUuidAndRecapture(personUuid, recapture));
     }
+
     @DeleteMapping(BASE_URL_VERSION_ONE + "/person/{personId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAllPersonBiometrics(@PathVariable Long personId) {
@@ -78,5 +77,16 @@ public class BiometricController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBiometrics(@PathVariable String id) {
         biometricService.deleteBiometrics (id);
+    }
+
+    @GetMapping(BASE_URL_VERSION_ONE + "/grouped/person/{personId}")
+    public ResponseEntity<List<GroupedCapturedBiometric>> getGroupedCapturedBiometric(@PathVariable Long personId) {
+        return ResponseEntity.ok (biometricService.getGroupedCapturedBiometric(personId));
+    }
+
+    @DeleteMapping(BASE_URL_VERSION_ONE)
+    public void removeTemplateType(@RequestParam Long personId,
+                                   @RequestParam String templateType) {
+        biometricService.removeTemplateType(personId, templateType);
     }
 }
