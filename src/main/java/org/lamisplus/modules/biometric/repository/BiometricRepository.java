@@ -74,6 +74,9 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     @Query(value="SELECT uuid FROM patient_person WHERE id=?1", nativeQuery = true)
     Optional<String> getPersonUuid(Long patientId);
 
+    @Query(value="SELECT template FROM biometric WHERE person_uuid=?1 AND template_type=?2 AND recapture=?3", nativeQuery = true)
+    Optional<byte[]> getPersonUuidTemplateRecapture(String personUuid, String templateType, Integer recapture);
+
     @Query(value="SELECT DISTINCT (b.recapture) AS recapture, " +
             "b.enrollment_date AS captureDate, b.person_uuid AS personUuid, " +
             "b.count, b.archived " +

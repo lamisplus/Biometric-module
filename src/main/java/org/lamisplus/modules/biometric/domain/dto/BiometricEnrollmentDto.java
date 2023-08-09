@@ -35,4 +35,5 @@ public class BiometricEnrollmentDto implements Serializable {
     private Integer recapture;
     private String recaptureMessage;
     private String hashed;
+    private boolean match;
 }

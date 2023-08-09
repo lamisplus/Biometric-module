@@ -21,6 +21,7 @@ public class SecugenService {
     public static Integer totalPage=0;
     public static final String WARNING = "WARNING";
     public static final String RECAPTURE_MESSAGE = "No baseline biometrics for recapturing\nFingerprint exist but not same patient";
+    public static final String RECAPTURE_NO_MATCH_MESSAGE = "No baseline biometrics for recaptured finger";
     public static final String FINGERPRINT_ALREADY_CAPTURED = "Fingerprint already captured";
     public static final int IMAGE_QUALITY = 61;
     private final SecugenManager secugenManager;
@@ -74,22 +75,24 @@ public class SecugenService {
                         .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), template);
                 Boolean match = getMatch(biometricsInFacility, biometric.getTemplate());
                 Optional<String> optionalPersonUuid= biometricRepository.getPersonUuid(captureRequestDTO.getPatientId());
-                if (match) {
-                    if(recapture) {
-                        //if recapture and different patient
-                        if (MATCHED_PERSON_UUID != null && !MATCHED_PERSON_UUID.equals(optionalPersonUuid.get())) {
-                            this.addMessage(WARNING, biometric, "Fingerprint exist but not same patient");
+
+                //recapture
+                if(recapture) {
+                    Optional<byte[]> b = biometricRepository
+                            .getPersonUuidTemplateRecapture(optionalPersonUuid.get(), biometric.getBiometricType(), 0);
+                    if(b.isPresent()){
+                        if(secugenManager.matchTemplate(b.get(), biometric.getTemplate())){
+                            biometric.setMatch(true);
+                            LOG.info("person uuid match- {}", optionalPersonUuid.get());
+                        }else {
+                            this.addMessage(ERROR, biometric, RECAPTURE_NO_MATCH_MESSAGE);
+                            biometric.setType(BiometricEnrollmentDto.Type.WARNING);
+                            biometric.setMatch(false);
+                            LOG.info("person uuid not match- {}", optionalPersonUuid.get());
                         }
                     }
-                    if (!recapture) {
-                        return this.addMessage(ERROR, biometric, FINGERPRINT_ALREADY_CAPTURED);
-                    }
                 }
-                //recapture but no match found
-                /*if(recapture && !match) {
-                    this.addMessage(WARNING, biometric, RECAPTURE_MESSAGE);
-                    biometric.setType(BiometricEnrollmentDto.Type.WARNING);
-                }*/
+
                 byte[] scannedTemplate = biometric.getTemplate();
                 if(biometric.getTemplate() != null && !BiometricStoreDTO.getPatientBiometricStore().isEmpty()) {
                     final List<CapturedBiometricDto> capturedBiometricsListDTO = BiometricStoreDTO
