@@ -48,6 +48,8 @@ public class PimsTracker  extends BiometricAuditEntity  implements Serializable,
 	@Column(columnDefinition = "jsonb")
 	private JsonNode data;
 	
+	private Long facilityId;
+	
 	private Integer archived = 0;
 	
 	@Override
