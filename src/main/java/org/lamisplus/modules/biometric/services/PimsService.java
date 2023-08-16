@@ -28,7 +28,7 @@ import java.util.*;
 public class PimsService {
 	
 	private final PimsTrackerRepository pimsTrackerRepository;
-	public PimsVerificationResponseDTO verifyPatientFromPins(Long facilityId,String patientId, PimsRequestDTO pimsRequestDTO) {
+	public Object verifyPatientFromPins(Long facilityId,String patientId, PimsRequestDTO pimsRequestDTO) {
 		LOG.info("id {}", patientId);
 		ObjectMapper mapper = new ObjectMapper();
 		PimsVerificationResponseDTO pimsVerificationResponseDTO = patientISAlreadyPIMSVerified(facilityId, patientId,mapper);
@@ -50,7 +50,7 @@ public class PimsService {
 				return responseEntity.getBody();
 			}else {
 				LOG.error("Failed authentication from PIMS server, kindly ensure you had valid credentials");
-				return null;
+				return  pimsAuthentication;
 			}
 	}
 	

@@ -21,7 +21,7 @@ public class PIMSController {
 	private final String BASE_URL_VERSION_ONE = "/api/v1/pims";
 	
 	@PostMapping(BASE_URL_VERSION_ONE + "/verify/{facilityId}")
-	public ResponseEntity<PimsVerificationResponseDTO> saveBiometricTemplate(
+	public ResponseEntity<Object> saveBiometricTemplate(
 			@PathVariable  long facilityId,
 			@RequestParam(name = "patientId",  required = false) String patientId,
 			@RequestBody PimsRequestDTO pimsRequestDTO){
