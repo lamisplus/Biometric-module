@@ -1,43 +1,75 @@
 package org.lamisplus.modules.biometric.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import liquibase.pro.packaged.G;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
+import org.lamisplus.modules.biometric.domain.PimsConfig;
 import org.lamisplus.modules.biometric.domain.PimsTracker;
 import org.lamisplus.modules.biometric.domain.dto.PimsAuthenticationResponse;
 import org.lamisplus.modules.biometric.domain.dto.PimsRequestDTO;
 import org.lamisplus.modules.biometric.domain.dto.PimsUserCredentials;
 import org.lamisplus.modules.biometric.domain.dto.PimsVerificationResponseDTO;
+import org.lamisplus.modules.biometric.repository.PimsConfigRepository;
 import org.lamisplus.modules.biometric.repository.PimsTrackerRepository;
-import org.lamisplus.modules.patient.controller.exception.AlreadyExistException;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import javax.naming.AuthenticationException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PimsService {
 	
+	public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "http://stagedemo.phis3project.org.ng/pims";
 	private final PimsTrackerRepository pimsTrackerRepository;
+	private final PimsConfigRepository pimsConfigRepository;
+	
+	
+	public PimsConfig registerPimsConfig(String username, String password, String url){
+		return  pimsConfigRepository.save(new PimsConfig(username, password, url));
+	}
+	
+	public PimsConfig updatePimsConfig(Long id, PimsConfig pimsConfig){
+		PimsConfig pimConfig = pimsConfigRepository
+						.findById(id)
+						.orElseThrow(() -> new EntityNotFoundException(PimsConfig.class, "id", id + " not found"));
+		pimConfig.setUrl(pimsConfig.getUrl());
+		pimConfig.setUsername(pimsConfig.getUsername());
+		pimConfig.setPassword(pimsConfig.getPassword());
+		return  pimsConfigRepository.save(pimConfig);
+	}
+	
+	public List<PimsConfig> getPimConfigs(){
+		return  pimsConfigRepository.findAll().stream().filter(pimsConfig -> pimsConfig.getArchived()==0)
+				.collect(Collectors.toList());
+	}
+	
 	public Object verifyPatientFromPins(Long facilityId,String patientId, PimsRequestDTO pimsRequestDTO) {
 		LOG.info("id {}", patientId);
+		LOG.info("facility {}", facilityId);
 		ObjectMapper mapper = new ObjectMapper();
 		PimsVerificationResponseDTO pimsVerificationResponseDTO = patientISAlreadyPIMSVerified(facilityId, patientId,mapper);
 		if(pimsVerificationResponseDTO != null){
 			return pimsVerificationResponseDTO;
 		}
 		RestTemplate restTemplate = new RestTemplate();
+		String url = HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS + "/findPatient";
 		PimsAuthenticationResponse pimsAuthentication = getPimsAuthentication(restTemplate);
-		String url = "http://stagedemo.phis3project.org.ng/pims/findPatient";
+		Optional<PimsConfig> config = pimsConfigRepository.findAll().stream()
+				.filter(c -> c.getArchived() == 0)
+				.findAny();
+		if(config.isPresent()){
+			LOG.info("dynamic configuration");
+			url = config.get().getUrl()+"/findPatient";
+		}
 			if (pimsAuthentication != null && pimsAuthentication.getIsAuthenticated().equalsIgnoreCase("true")) {
 				String token = pimsAuthentication.getToken();
 				pimsRequestDTO.setToken(token);
@@ -57,24 +89,45 @@ public class PimsService {
 	private void saveVerificationOnLocalSystem(Long facilityId, String patientId, ObjectMapper mapper, PimsVerificationResponseDTO response) {
 		JsonNode jsonNodeResponse = mapper.valueToTree(response);
 		LOG.info("saving Response on system ");
-		PimsTracker pimsTracker = PimsTracker.builder()
-				.isVerified(response.getMessage().contains("success"))
-				.facilityId(facilityId)
-				.data(jsonNodeResponse)
-				.pimsPatientId(response.getEnrollments().get(0).getPatientId())
-				.personUuid(patientId)
-				.date(LocalDate.now())
-				.build();
-		pimsTrackerRepository.save(pimsTracker);
-		LOG.info("save successfully");
+		String pimPatientId = null;
+		if(!response.getEnrollments().isEmpty()){
+			pimPatientId = response.getEnrollments().get(0).getPatientId();
+		}
+		Optional<PimsTracker> pimsTrackerOptional =
+				pimsTrackerRepository.getPimsTrackerByPersonUuidAndFacilityIdAndArchived(patientId, facilityId,0);
+		if(pimsTrackerOptional.isPresent()){
+			PimsTracker pimsTracker = pimsTrackerOptional.get();
+			pimsTracker.setArchived(0);
+			pimsTracker.setData(jsonNodeResponse);
+			pimsTracker.setDate(LocalDate.now());
+			pimsTracker.setPimsPatientId(pimPatientId);
+			pimsTracker.setIsVerified(response.getMessage().contains("success"));
+			pimsTrackerRepository.save(pimsTracker);
+			LOG.info("updated successfully");
+		}else {
+			PimsTracker pimsTracker = PimsTracker.builder()
+					.isVerified(response.getMessage().contains("success"))
+					.facilityId(facilityId)
+					.data(jsonNodeResponse)
+					.pimsPatientId(pimPatientId)
+					.personUuid(patientId)
+					.archived(0)
+					.date(LocalDate.now())
+					.build();
+			pimsTrackerRepository.save(pimsTracker);
+			LOG.info("save successfully");
+		}
 	}
 	
 	private PimsVerificationResponseDTO patientISAlreadyPIMSVerified(Long facilityId, String patientId, ObjectMapper mapper) {
 		try {
 			if (patientId != null) {
-				Optional<PimsTracker> pimsTrackerOptional = pimsTrackerRepository.getPimsTrackerByPersonUuidAndFacilityId(patientId, facilityId);
+				LOG.info("An already existed verified patient " );
+				Optional<PimsTracker> pimsTrackerOptional =
+						pimsTrackerRepository.getPimsTrackerByPersonUuidAndFacilityIdAndArchived(patientId, facilityId,0);
 				if (pimsTrackerOptional.isPresent()) {
 					PimsTracker pimsTracker = pimsTrackerOptional.get();
+					LOG.info("data {}",  pimsTracker.toString());
 					if (pimsTracker.getIsVerified()) {
 						JsonNode data = pimsTracker.getData();
 						return mapper.treeToValue(data, PimsVerificationResponseDTO.class);
@@ -82,15 +135,27 @@ public class PimsService {
 				}
 			}
 		}catch(Exception e){
-		  LOG.error("An error during authentication error {} ", Arrays.toString(e.getStackTrace()) );
+		  LOG.error("An error occur during  checking a patient in the DB error message {} ", Arrays.toString(e.getStackTrace()) );
 		}
 		return null;
 	}
 	
 	public PimsAuthenticationResponse getPimsAuthentication(RestTemplate restTemplate) {
 		try {
-			String url = "http://stagedemo.phis3project.org.ng/pims/auth";
-			PimsUserCredentials userCredentials = new PimsUserCredentials("test_user", "test_user_password");
+			Optional<PimsConfig> config = pimsConfigRepository.findAll().stream()
+					.filter(c -> c.getArchived() == 0)
+					.findAny();
+			String url = HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS + "/auth";
+			PimsUserCredentials userCredentials = null;
+			if(config.isPresent()){
+				PimsConfig pimsConfig = config.get();
+				url = pimsConfig.getUrl()+"/auth";
+				LOG.info("dynamic coded configuration");
+				userCredentials = new PimsUserCredentials(pimsConfig.getUsername(), pimsConfig.getPassword());
+			}else{
+				LOG.info("Hand coded configuration");
+				 userCredentials = new PimsUserCredentials("nonye.nwanya@thepalladiumgroup.com", "]W(I*=v}-+z8h$F");
+			}
 			HttpEntity<PimsUserCredentials> loginEntity = new HttpEntity<>(userCredentials, GetHTTPHeaders());
 			ResponseEntity<PimsAuthenticationResponse> responseEntity =
 					getRestTemplate(restTemplate).exchange(url, HttpMethod.POST, loginEntity, PimsAuthenticationResponse.class);

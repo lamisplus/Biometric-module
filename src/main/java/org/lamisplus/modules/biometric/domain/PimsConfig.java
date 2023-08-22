@@ -25,6 +25,13 @@ public class PimsConfig extends BiometricAuditEntity  implements Serializable, P
 	@Column(name = "id", nullable = false)
 	private Long id;
 	private String  username;
+	
+	public PimsConfig(String username, String password, String url) {
+		this.username = username;
+		this.password = password;
+		this.url = url;
+	}
+	
 	private String password;
 	private String url;
 	private Integer archived = 0;
