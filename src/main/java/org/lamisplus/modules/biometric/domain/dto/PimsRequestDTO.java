@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PimsRequestDTO {
-	private String fp;
+	private String finger;
 	private int index;
-	private String token;
+	private String facilityId;
 	
 }

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
+import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
+import org.lamisplus.modules.base.domain.repositories.OrganisationUnitIdentifierRepository;
 import org.lamisplus.modules.biometric.domain.PimsConfig;
 import org.lamisplus.modules.biometric.domain.PimsTracker;
 import org.lamisplus.modules.biometric.domain.dto.PimsAuthenticationResponse;
@@ -27,9 +29,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PimsService {
 	
-	public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "http://stagedemo.phis3project.org.ng/pims";
+	//public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "http://stagedemo.phis3project.org.ng/pims";
+	public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "http://pimssandbox.phis3project.org.ng/api";
 	private final PimsTrackerRepository pimsTrackerRepository;
 	private final PimsConfigRepository pimsConfigRepository;
+	
+	private final OrganisationUnitIdentifierRepository identifierRepository;
 	
 	
 	public PimsConfig registerPimsConfig(String username, String password, String url){
@@ -38,12 +43,32 @@ public class PimsService {
 	
 	public PimsConfig updatePimsConfig(Long id, PimsConfig pimsConfig){
 		PimsConfig pimConfig = pimsConfigRepository
-						.findById(id)
-						.orElseThrow(() -> new EntityNotFoundException(PimsConfig.class, "id", id + " not found"));
+				.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException(PimsConfig.class, "id", id + " not found"));
 		pimConfig.setUrl(pimsConfig.getUrl());
 		pimConfig.setUsername(pimsConfig.getUsername());
 		pimConfig.setPassword(pimsConfig.getPassword());
 		return  pimsConfigRepository.save(pimConfig);
+	}
+	
+	public List<PimsTracker> getAllPimsVerification(){
+		return  pimsTrackerRepository.findAll()
+				.stream()
+				.filter(p->p.getArchived() == 0)
+				.collect(Collectors.toList());
+	}
+	public List<PimsTracker> getPassedPimsVerification(){
+		return  pimsTrackerRepository.findAll()
+				.stream()
+				.filter(p->p.getArchived() == 0 && p.getIsVerified())
+				.collect(Collectors.toList());
+	}
+	
+	public List<PimsTracker> getFailedPimsVerification(){
+		return  pimsTrackerRepository.findAll()
+				.stream()
+				.filter(p->p.getArchived() == 0 && !p.getIsVerified())
+				.collect(Collectors.toList());
 	}
 	
 	public List<PimsConfig> getPimConfigs(){
@@ -59,20 +84,31 @@ public class PimsService {
 		if(pimsVerificationResponseDTO != null){
 			return pimsVerificationResponseDTO;
 		}
+		Optional<OrganisationUnitIdentifier> datimIdOptional = identifierRepository.findAll()
+				.stream()
+				.filter(i -> i.getOrganisationUnitId().equals(facilityId) && i.getName().equals("DATIM_ID"))
+				.findAny();
+		if(datimIdOptional.isPresent()){
+			OrganisationUnitIdentifier organisationUnitIdentifier = datimIdOptional.get();
+			pimsRequestDTO.setFacilityId(organisationUnitIdentifier.getCode());
+			LOG.info("datim code {}", organisationUnitIdentifier.getCode());
+		}
 		RestTemplate restTemplate = new RestTemplate();
-		String url = HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS + "/findPatient";
+		String url = "http://pimssandbox.phis3project.org.ng/api/Prints/findClient";
 		PimsAuthenticationResponse pimsAuthentication = getPimsAuthentication(restTemplate);
 		Optional<PimsConfig> config = pimsConfigRepository.findAll().stream()
 				.filter(c -> c.getArchived() == 0)
 				.findAny();
 		if(config.isPresent()){
 			LOG.info("dynamic configuration");
-			url = config.get().getUrl()+"/findPatient";
+			url = config.get().getUrl()+"/Prints/findClient";
 		}
 			if (pimsAuthentication != null && pimsAuthentication.getIsAuthenticated().equalsIgnoreCase("true")) {
 				String token = pimsAuthentication.getToken();
-				pimsRequestDTO.setToken(token);
-				HttpEntity<PimsRequestDTO> requestDTOEntity = new HttpEntity<>(pimsRequestDTO, GetHTTPHeaders());
+				LOG.info("token: " + token);
+				HttpHeaders headers = GetHTTPHeaders();
+				headers.add("Authorization","Bearer "+token);
+				HttpEntity<PimsRequestDTO> requestDTOEntity = new HttpEntity<>(pimsRequestDTO, headers);
 				ResponseEntity<PimsVerificationResponseDTO> responseEntity =
 						getRestTemplate(restTemplate).exchange(url, HttpMethod.POST, requestDTOEntity, PimsVerificationResponseDTO.class);
 				PimsVerificationResponseDTO response = responseEntity.getBody();
@@ -90,7 +126,7 @@ public class PimsService {
 		LOG.info("saving Response on system ");
 		String pimPatientId = null;
 		if(!response.getEnrollments().isEmpty()){
-			pimPatientId = response.getEnrollments().get(0).getPatientId();
+			pimPatientId = response.getEnrollments().get(0).getPatientIdentifier();
 		}
 		Optional<PimsTracker> pimsTrackerOptional =
 				pimsTrackerRepository.getPimsTrackerByPersonUuidAndFacilityIdAndArchived(patientId, facilityId,0);
@@ -144,16 +180,18 @@ public class PimsService {
 			Optional<PimsConfig> config = pimsConfigRepository.findAll().stream()
 					.filter(c -> c.getArchived() == 0)
 					.findAny();
-			String url = HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS + "/auth";
+			String url = "http://pimssandbox.phis3project.org.ng/api/auth/token";
 			PimsUserCredentials userCredentials = null;
 			if(config.isPresent()){
 				PimsConfig pimsConfig = config.get();
-				url = pimsConfig.getUrl()+"/auth";
+				url = pimsConfig.getUrl()+"/auth/token";
 				LOG.info("dynamic coded configuration");
 				userCredentials = new PimsUserCredentials(pimsConfig.getUsername(), pimsConfig.getPassword());
+				
 			}else{
 				LOG.info("Hand coded configuration");
 				 userCredentials = new PimsUserCredentials("nonye.nwanya@thepalladiumgroup.com", "]W(I*=v}-+z8h$F");
+				LOG.info("payload: " + userCredentials.toString());
 			}
 			HttpEntity<PimsUserCredentials> loginEntity = new HttpEntity<>(userCredentials, GetHTTPHeaders());
 			ResponseEntity<PimsAuthenticationResponse> responseEntity =
