@@ -205,6 +205,7 @@
             WHERE b.archived=0 AND b.person_uuid=t.person_uuid;
         </sql>
     </changeSet>
+
     <changeSet failOnError="true" author="Dr Java" id="biometrics-0011">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">

@@ -1,6 +1,7 @@
 package org.lamisplus.modules.biometric.domain.dto;
 
 import lombok.Data;
+import org.lamisplus.modules.biometric.domain.Deduplication;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -36,4 +37,6 @@ public class BiometricEnrollmentDto implements Serializable {
     private String recaptureMessage;
     private String hashed;
     private boolean match;
+    private Deduplication deduplication;
+    private ClientIdentificationDTO clientIdentificationDTO;
 }
