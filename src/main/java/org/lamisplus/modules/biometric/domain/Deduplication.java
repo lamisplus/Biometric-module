@@ -1,10 +1,20 @@
 package org.lamisplus.modules.biometric.domain;
 
 
+import com.vladmihalcea.hibernate.type.array.IntArrayType;
+import com.vladmihalcea.hibernate.type.array.StringArrayType;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonNodeBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonNodeStringType;
+import com.vladmihalcea.hibernate.type.json.JsonStringType;
 import lombok.*;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.HashMap;
 
 @Entity
 @Table(name = "deduplication")
@@ -14,6 +24,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Builder
+@TypeDefs({
+        @TypeDef(name = "string-array", typeClass = StringArrayType.class),
+        @TypeDef(name = "int-array", typeClass = IntArrayType.class),
+        @TypeDef(name = "json", typeClass = JsonStringType.class),
+        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class),
+        @TypeDef(name = "jsonb-node", typeClass = JsonNodeBinaryType.class),
+        @TypeDef(name = "json-node", typeClass = JsonNodeStringType.class),
+})
 public class Deduplication {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,4 +61,11 @@ public class Deduplication {
 
     @Column(name = "imperfect_match_count")
     private Integer imperfectMatchCount=0;
+
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb", name = "details", nullable = false)
+    private Object details;
+
+    @Transient
+    private HashMap<String, String> mapDetails = new HashMap<>();
 }
