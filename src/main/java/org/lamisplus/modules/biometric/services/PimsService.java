@@ -9,15 +9,13 @@ import org.lamisplus.modules.base.domain.entities.OrganisationUnitIdentifier;
 import org.lamisplus.modules.base.domain.repositories.OrganisationUnitIdentifierRepository;
 import org.lamisplus.modules.biometric.domain.PimsConfig;
 import org.lamisplus.modules.biometric.domain.PimsTracker;
-import org.lamisplus.modules.biometric.domain.dto.PimsAuthenticationResponse;
-import org.lamisplus.modules.biometric.domain.dto.PimsRequestDTO;
-import org.lamisplus.modules.biometric.domain.dto.PimsUserCredentials;
-import org.lamisplus.modules.biometric.domain.dto.PimsVerificationResponseDTO;
+import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.repository.PimsConfigRepository;
 import org.lamisplus.modules.biometric.repository.PimsTrackerRepository;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
@@ -108,7 +106,11 @@ public class PimsService {
 				LOG.info("token: " + token);
 				HttpHeaders headers = GetHTTPHeaders();
 				headers.add("Authorization","Bearer "+token);
-				HttpEntity<PimsRequestDTO> requestDTOEntity = new HttpEntity<>(pimsRequestDTO, headers);
+				PimsOnlineRequestDTO request = new PimsOnlineRequestDTO();
+				request.setIndex(pimsRequestDTO.getIndex());
+				request.setFacilityId(pimsRequestDTO.getFacilityId());
+				request.setFinger(Base64.getEncoder().encodeToString(pimsRequestDTO.getFinger()));
+				HttpEntity<PimsOnlineRequestDTO> requestDTOEntity = new HttpEntity<>(request, headers);
 				ResponseEntity<PimsVerificationResponseDTO> responseEntity =
 						getRestTemplate(restTemplate).exchange(url, HttpMethod.POST, requestDTOEntity, PimsVerificationResponseDTO.class);
 				PimsVerificationResponseDTO response = responseEntity.getBody();
@@ -220,4 +222,10 @@ public class PimsService {
 		headers.add("user-agent", "Application");
 		return headers;
 	}
+	
+//	public String bcryptHash(byte[] template) {
+//		String encoded = Base64.getEncoder().encodeToString(template);
+//		return BCrypt.hashpw(encoded, "$2a$12$MklNDNgs4Agd50cSasj91O");
+//	}
+
 }
