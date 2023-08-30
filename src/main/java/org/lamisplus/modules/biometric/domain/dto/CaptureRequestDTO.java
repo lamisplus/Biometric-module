@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Data
 public class CaptureRequestDTO {
-    @NotNull(message = "patientId is mandatory")
+    //@NotNull(message = "patientId is mandatory")
     private Long patientId;
 
     @NotBlank(message = "templateType is mandatory")

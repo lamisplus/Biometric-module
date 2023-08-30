@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 public class PimsVerificationResponseDTO {
 	private int code;
-	private List< NdrPatientCurrentTreatmentDetail > enrollments;
+	private List<NdrPatientCurrentTreatmentDetail > enrollments;
 	private String message;
 	
 }
