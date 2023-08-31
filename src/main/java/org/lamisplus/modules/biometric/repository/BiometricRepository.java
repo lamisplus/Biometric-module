@@ -1,6 +1,9 @@
 package org.lamisplus.modules.biometric.repository;
 
 import org.lamisplus.modules.biometric.domain.Biometric;
+import org.lamisplus.modules.biometric.domain.ClientIdentificationProject;
+import org.lamisplus.modules.biometric.domain.dto.BiometricPerson;
+import org.lamisplus.modules.biometric.domain.dto.ClientIdentificationDTO;
 import org.lamisplus.modules.biometric.domain.dto.GroupedCapturedBiometric;
 import org.lamisplus.modules.biometric.domain.dto.StoredBiometric;
 import org.springframework.data.domain.Page;
@@ -74,6 +77,30 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     @Query(value="SELECT uuid FROM patient_person WHERE id=?1", nativeQuery = true)
     Optional<String> getPersonUuid(Long patientId);
 
+    @Query(value="SELECT template FROM biometric WHERE person_uuid=?1 AND template_type=?2 AND recapture=?3", nativeQuery = true)
+    Optional<byte[]> getPersonUuidTemplateRecapture(String personUuid, String templateType, Integer recapture);
+
+    @Query(value="SELECT person_uuid AS personUuid, recapture, string_agg((CASE template_type WHEN 'Right Middle Finger' THEN template END), '') AS rightMiddleFinger,   \n" +
+            "                string_agg((CASE template_type WHEN 'Right Thumb' THEN template END), '') AS rightThumb,  \n" +
+            "            string_agg((CASE template_type WHEN 'Right Index Finger' THEN template END), '') AS rightIndexFinger,  \n" +
+            "            string_agg((CASE template_type WHEN 'Right Ring Finger' THEN template END), '') AS rightRingFinger, \n" +
+            "            string_agg((CASE template_type WHEN 'Right Little Finger' THEN template END), '') AS rightLittleFinger, \n" +
+            "            string_agg((CASE template_type WHEN 'Left Index Finger' THEN template END), '') AS leftIndexFinger,   \n" +
+            "            string_agg((CASE template_type WHEN 'Left Middle Finger' THEN template END), '') AS leftMiddleFinger,  \n" +
+            "            string_agg((CASE template_type WHEN 'Left Thumb' THEN template END), '') AS leftThumb, \n" +
+            "            string_agg((CASE template_type WHEN 'Left Ring Finger' THEN template END), '') AS leftRingFinger, \n" +
+            "            string_agg((CASE template_type WHEN 'Left Little Finger' THEN template END), '') AS leftLittleFinger \n" +
+            "            From biometric WHERE facility_id=?1 AND person_uuid=?2 AND archived=0" +
+            " GROUP BY person_uuid, recapture", nativeQuery = true)
+    Set<StoredBiometric> findByFacilityIdWithTemplateAndPersonUuid(Long facilityId, String personUuid);
+
+
+
+
+    @Query(value="SELECT template FROM biometric WHERE person_uuid=?1 AND recapture=?2", nativeQuery = true)
+    List<byte[]> getPersonUuidTemplatesForRecapture(String personUuid, Integer recapture);
+
+
     @Query(value="SELECT DISTINCT (b.recapture) AS recapture, " +
             "b.enrollment_date AS captureDate, b.person_uuid AS personUuid, " +
             "b.count, b.archived " +
@@ -84,4 +111,12 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     List<GroupedCapturedBiometric> getGroupedPersonBiometric(Long patientId);
     
     List<Biometric> findAllByPersonUuidAndRecapture(String personUuid, Integer recapture);
+
+
+    @Query(value="SELECT id, first_name AS firstName, surname FROM patient_person WHERE person_uuid=?1", nativeQuery = true)
+    Optional<BiometricPerson> getBiometricPerson(String personUuid);
+
+    @Query(value="SELECT id, first_name AS firstName, surname AS surName, hospital_number AS hospitalNumber, sex " +
+            "FROM patient_person WHERE uuid=?1", nativeQuery = true)
+    Optional<ClientIdentificationProject> getBiometricPersonData(String personUuid);
 }

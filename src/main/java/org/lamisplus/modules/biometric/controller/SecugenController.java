@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.lamisplus.modules.biometric.domain.dto.BiometricEnrollmentDto;
-import org.lamisplus.modules.biometric.domain.dto.CaptureRequestDTO;
-import org.lamisplus.modules.biometric.domain.dto.DeviceDTO;
-import org.lamisplus.modules.biometric.domain.dto.ErrorCodeDTO;
+import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.services.SecugenManager;
 import org.lamisplus.modules.biometric.services.SecugenService;
 import org.springframework.core.io.ClassPathResource;
@@ -54,8 +51,14 @@ public class SecugenController {
     public BiometricEnrollmentDto enrollment(@RequestParam String reader,
                                              @RequestParam(required = false, defaultValue = "false") Boolean isNew,
                                              @RequestParam(required = false, defaultValue = "false") Boolean recapture,
+                                             @RequestParam(required = false, defaultValue = "false") Boolean identify,
                                              @Valid @RequestBody CaptureRequestDTO captureRequestDTO) {
-        return secugenService.enrollment(reader, isNew, recapture, captureRequestDTO);
+        return secugenService.enrollment(reader, identify, isNew, recapture, captureRequestDTO);
+    }
+
+    @PostMapping(BIOMETRICS_URL_VERSION_ONE + "/identify")
+    public ClientIdentificationDTO enrollment(@RequestParam String reader) {
+        return secugenService.identify(reader);
     }
 
     @PostMapping(BIOMETRICS_URL_VERSION_ONE + "/enrollment2")
