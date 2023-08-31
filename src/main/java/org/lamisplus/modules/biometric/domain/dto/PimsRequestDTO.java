@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PimsRequestDTO {
-	private String finger;
+	private byte[] finger;
 	private int index;
 	private String facilityId;
 	

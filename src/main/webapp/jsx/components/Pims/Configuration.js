@@ -256,7 +256,7 @@ const Configuration = (props) => {
                 <hr />
                 <Row>
                   <Col md={12}>
-                    {logins.length < 0 ? (
+                    {logins.length === 0 ? (
                       "NO CREDENTIALS IS PROVIDED YET"
                     ) : (
                       <Table bordered size="sm" responsive>

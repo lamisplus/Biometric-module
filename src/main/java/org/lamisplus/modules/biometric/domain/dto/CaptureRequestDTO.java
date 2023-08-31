@@ -15,7 +15,7 @@ public class CaptureRequestDTO {
     //@NotNull(message = "patientId is mandatory")
     private Long patientId;
 
-    @NotBlank(message = "templateType is mandatory")
+    //@NotBlank(message = "templateType is mandatory")
     private String templateType;
 
     @NotBlank(message = "biometricType is mandatory")

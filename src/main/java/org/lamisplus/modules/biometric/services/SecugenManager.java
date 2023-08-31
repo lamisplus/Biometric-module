@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static SecuGen.FDxSDKPro.jni.SGPPPortAddr.USB_AUTO_DETECT;
@@ -209,6 +210,31 @@ public class SecugenManager {
             ex.printStackTrace();
         }
         return matched[0];
+    }
+    
+    /**
+     * @param template1
+     * @param template2
+     * @return
+     */
+    public HashMap<Integer, Boolean> identifyTemplate(byte[] template1, byte[] template2) {
+        boolean[] matched = new boolean[1];
+        int[] score = new int[1];
+        HashMap<Integer, Boolean> matcher = new HashMap<>();
+        try {
+            long sl = SGFDxSecurityLevel.SL_NORMAL;
+            /*if ((template1.length - template2.length) > 200) {
+                return false;
+            }*/
+            error = this.sgfplib.MatchTemplate(template1, template2, sl, matched);
+            error = this.sgfplib.GetMatchingScore(template1, template2, score);
+            matcher.put(score[0], Boolean.valueOf(String.valueOf(matched)));
+            return matcher;
+            //System.out.println("ERROR RATE: "+error +" " +" MATCHED: " + matched[0]);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return matcher;
     }
     
     /**
