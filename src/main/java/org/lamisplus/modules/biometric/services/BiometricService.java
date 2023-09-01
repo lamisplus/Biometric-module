@@ -59,7 +59,6 @@ public class BiometricService {
                 .orElseThrow (()-> new EntityNotFoundException (Person.class, "Id", ""+personId));
         List<Biometric> biometrics = biometricRepository.findAllByPersonUuid (person.getUuid ());
         final CapturedBiometricDTOS[] capturedBiometricDTOS = {new CapturedBiometricDTOS()};
-
         if(biometrics.isEmpty()) throw new EntityNotFoundException(Biometric.class, "personId", "" +personId);
         biometrics.forEach(biometric -> capturedBiometricDTOS[0] = getCapturedBiometricDTOS(capturedBiometricDTOS[0],
                 personId, biometric, biometrics));
