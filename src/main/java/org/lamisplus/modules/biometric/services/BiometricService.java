@@ -34,10 +34,15 @@ public class BiometricService {
             //IllegalTypeException
             throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Type is Error");
         }
+        
+        
         Long personId = biometricEnrollmentDto.getPatientId ();
         Person person = personRepository.findById (personId)
                 .orElseThrow(() -> new EntityNotFoundException(BiometricEnrollmentDto.class,"patientId:", ""+personId));
-
+    
+        if(biometricRepository.getBiometricByDate(person.getUuid(), LocalDate.now()) > 0){
+            throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Capture on same date");
+        }
         Optional<Integer> opRecapture = biometricRepository.findMaxRecapture(person.getUuid());
         Integer recapture=-1;
         if(opRecapture.isPresent())recapture=Integer.valueOf(opRecapture.get());

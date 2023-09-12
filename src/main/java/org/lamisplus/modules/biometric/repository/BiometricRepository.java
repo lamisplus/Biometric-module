@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +25,10 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
 
     @Query(value ="SELECT recapture FROM biometric WHERE person_uuid=?1 ORDER BY id DESC LIMIT 1", nativeQuery = true)
     Optional<Integer> findMaxRecapture(String personUuid);
-
+    
+    @Query(value ="SELECT COUNT(person_uuid) FROM biometric WHERE person_uuid=?1 AND enrollment_date=?2 AND archived=0", nativeQuery = true)
+    Integer getBiometricByDate(String personUuid, LocalDate enrollmentDate);
+    
     List<Biometric> findAllByPersonUuidAndRecapture(String personUuid, String recapture);
     @Query(value ="SELECT * FROM biometric WHERE last_modified_date > ?1 AND facility_id=?2", nativeQuery = true)
     public List<Biometric> getAllDueForServerUpload(LocalDateTime dateLastSync, Long facilityId);
