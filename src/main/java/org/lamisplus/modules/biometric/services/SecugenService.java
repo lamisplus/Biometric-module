@@ -100,7 +100,7 @@ public class SecugenService {
                 //recapture
                 if(recapture) {
                     Optional<String> optionalPersonUuid= biometricRepository.getPersonUuid(captureRequestDTO.getPatientId());
-                    recapture(true, optionalPersonUuid, biometric);
+                    recaptureOrIdentify(true, optionalPersonUuid, biometric);
                 }else {
                     if(getMatch(biometricsInFacility, biometric.getTemplate())){
                         this.addMessage(ERROR, biometric, FINGERPRINT_ALREADY_CAPTURED);
@@ -382,15 +382,12 @@ public class SecugenService {
          * @param biometricEnrollmentDto
          * @return BiometricEnrollmentDto
          */
-    private BiometricEnrollmentDto recapture(Boolean recapture,
-                                             Optional<String> optionalPersonUuid,
-                                             BiometricEnrollmentDto biometricEnrollmentDto,
-                                             String template){
+    private BiometricEnrollmentDto recaptureOrIdentify(Boolean recapture,
+                                        Optional<String> optionalPersonUuid,
+                                        BiometricEnrollmentDto biometricEnrollmentDto){
         if(recapture) {
             HashMap<String, String> mapDetails = new HashMap<>();
-            Set<StoredBiometric> personBiometrics = biometricRepository
-                    .findByFacilityIdWithTemplateAndPersonUuid(facility.getCurrentUserOrganization(),
-                            optionalPersonUuid.get(), 0, template);
+            Set<StoredBiometric> personBiometrics = biometricRepository.findByFacilityIdWithTemplateAndPersonUuid(facility.getCurrentUserOrganization(), optionalPersonUuid.get());
 
             if (!personBiometrics.isEmpty()) {
                 if (getMatch(personBiometrics, biometricEnrollmentDto.getTemplate())) {
