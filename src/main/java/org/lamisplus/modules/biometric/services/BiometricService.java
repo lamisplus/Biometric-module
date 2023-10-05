@@ -2,6 +2,7 @@ package org.lamisplus.modules.biometric.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.base.controller.apierror.IllegalTypeException;
@@ -29,7 +30,7 @@ public class BiometricService {
     private final PersonRepository personRepository;
     private  final UserService userService;
 
-    public BiometricDto biometricEnrollment(BiometricEnrollmentDto biometricEnrollmentDto) {
+    public BiometricDto biometricEnrollment(BiometricEnrollmentDto biometricEnrollmentDto, Boolean isMobile) {
         if(biometricEnrollmentDto.getType().equals(BiometricEnrollmentDto.Type.ERROR)){
             //IllegalTypeException
             throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Type is Error");
@@ -43,13 +44,14 @@ public class BiometricService {
         if(opRecapture.isPresent())recapture=Integer.valueOf(opRecapture.get());
         Integer recap = ++recapture;
         String biometricType = biometricEnrollmentDto.getBiometricType ();
+        LocalDate enrollmentDate = (isMobile && biometricEnrollmentDto.getEnrollmentDate() != null)? biometricEnrollmentDto.getEnrollmentDate() : LocalDate.now();
         String deviceName = biometricEnrollmentDto.getDeviceName ();
         String reason = biometricEnrollmentDto.getReason();
         List<CapturedBiometricDto> capturedBiometricsList = biometricEnrollmentDto.getCapturedBiometricsList ();
         List<Biometric> biometrics = capturedBiometricsList.stream ()
                 .map (capturedBiometricDto -> convertDtoToEntity (capturedBiometricDto, person, biometricType, deviceName,
                         reason, capturedBiometricDto.getImageQuality(),
-                        recap, biometricEnrollmentDto.getRecaptureMessage(), capturedBiometricsList.size()))
+                        recap, biometricEnrollmentDto.getRecaptureMessage(), capturedBiometricsList.size(), enrollmentDate, isMobile))
                 .collect (Collectors.toList ());
         biometricRepository.saveAll (biometrics);
         return getBiometricDto (biometrics, personId);
@@ -130,7 +132,7 @@ public class BiometricService {
             CapturedBiometricDto capturedBiometricDto,
             Person person, String biometricType,
             String deviceName, String reason, int imageQuality,
-            Integer recapture, String recaptureMessage, Integer count) {
+            Integer recapture, String recaptureMessage, Integer count, LocalDate date, Boolean isMobile) {
         Biometric biometric = new Biometric ();
         biometric.setId (UUID.randomUUID ().toString ());
         biometric.setBiometricType (biometricType);
@@ -138,7 +140,7 @@ public class BiometricService {
         biometric.setTemplate (capturedBiometricDto.getTemplate ());
         biometric.setTemplateType (capturedBiometricDto.getTemplateType ());
         if(capturedBiometricDto.getHashed() != null)biometric.setHashed(capturedBiometricDto.getHashed());
-        biometric.setDate (LocalDate.now ());
+        biometric.setDate (date);
         biometric.setIso (true);
         biometric.setReason(reason);
         biometric.setVersionIso20(true);
@@ -204,9 +206,9 @@ public class BiometricService {
         return biometricDeviceRepository.findAll();
     }
 
-    public BiometricDto updatePersonBiometric(Long personId, BiometricEnrollmentDto biometricEnrollmentDto) {
+    public BiometricDto updatePersonBiometric(Long personId, BiometricEnrollmentDto biometricEnrollmentDto, Boolean isMobile) {
         biometricRepository.deleteAll(this.getPersonBiometrics(personId));
-        return biometricEnrollment(biometricEnrollmentDto);
+        return biometricEnrollment(biometricEnrollmentDto, isMobile);
     }
     public List<Biometric> getAllPersonBiometric(Long personId) {
         List<Biometric> personBiometrics = this.getPersonBiometrics(personId);

@@ -19,8 +19,9 @@ public class BiometricController {
     //Versioning through URI Path
     private final String BASE_URL_VERSION_ONE = "/api/v1/biometrics";
     @PostMapping(BASE_URL_VERSION_ONE + "/templates")
-    public ResponseEntity<BiometricDto> saveBiometricTemplate(@RequestBody BiometricEnrollmentDto biometrics) {
-        return ResponseEntity.ok (biometricService.biometricEnrollment (biometrics));
+    public ResponseEntity<BiometricDto> saveBiometricTemplate(@RequestBody BiometricEnrollmentDto biometrics,
+                                                              @RequestParam (required = false, defaultValue = "false") boolean isMobile) {
+        return ResponseEntity.ok (biometricService.biometricEnrollment (biometrics, isMobile));
     }
     @GetMapping(BASE_URL_VERSION_ONE + "/patient/{id}")
     public ResponseEntity<CapturedBiometricDTOS> findByPatient(@PathVariable Long id) {
@@ -43,8 +44,9 @@ public class BiometricController {
     }
 
     @PutMapping(BASE_URL_VERSION_ONE + "/person/{personId}")
-    public ResponseEntity<BiometricDto> updatePersonBiometric(@PathVariable Long personId, @RequestBody BiometricEnrollmentDto biometricEnrollmentDto) {
-        return ResponseEntity.ok (biometricService.updatePersonBiometric (personId, biometricEnrollmentDto));
+    public ResponseEntity<BiometricDto> updatePersonBiometric(@PathVariable Long personId, @RequestBody BiometricEnrollmentDto biometricEnrollmentDto,
+                                                              @RequestParam (required = false, defaultValue = "false") boolean isMobile) {
+        return ResponseEntity.ok (biometricService.updatePersonBiometric (personId, biometricEnrollmentDto, isMobile));
     }
     @DeleteMapping(BASE_URL_VERSION_ONE + "/device/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
