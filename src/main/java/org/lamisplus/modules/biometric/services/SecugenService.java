@@ -387,7 +387,8 @@ public class SecugenService {
                                         BiometricEnrollmentDto biometricEnrollmentDto){
         if(recapture) {
             HashMap<String, String> mapDetails = new HashMap<>();
-            Set<StoredBiometric> personBiometrics = biometricRepository.findByFacilityIdWithTemplateAndPersonUuid(facility.getCurrentUserOrganization(), optionalPersonUuid.get());
+            Set<StoredBiometric> personBiometrics = biometricRepository.findByFacilityIdWithTemplateAndPersonUuid(facility.getCurrentUserOrganization(),
+                    optionalPersonUuid.get(), 0, biometricEnrollmentDto.getTemplateType());
 
             if (!personBiometrics.isEmpty()) {
                 if (getMatch(personBiometrics, biometricEnrollmentDto.getTemplate())) {
