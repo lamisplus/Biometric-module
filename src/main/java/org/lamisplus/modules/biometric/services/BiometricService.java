@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class BiometricService {
     public static final int UN_ARCHIVED = 0;
     public static final int RECAPTURE = 0;
+    public static final int ARCHIVED = 1;
     private final BiometricRepository biometricRepository;
     private final BiometricDeviceRepository biometricDeviceRepository;
     private final PersonRepository personRepository;
@@ -237,7 +238,7 @@ public class BiometricService {
 
         if(!recapturedBiometrics.isEmpty()){
             recapturedBiometrics = recapturedBiometrics.stream()
-                    .map(biometric -> {biometric.setRecapture(0); return biometric;})
+                    .map(biometric -> {biometric.setRecapture(RECAPTURE); return biometric;})
                     .collect(Collectors.toList());
         }else {
             throw new EntityNotFoundException(Biometric.class, "Recapture", "biometrics");
@@ -245,7 +246,7 @@ public class BiometricService {
 
         if(!baselineBiometrics.isEmpty()){
             baselineBiometrics = baselineBiometrics.stream()
-                    .map(biometric -> {biometric.setArchived(1); return biometric;})
+                    .map(biometric -> {biometric.setArchived(ARCHIVED); return biometric;})
                     .collect(Collectors.toList());
         }else {
             throw new EntityNotFoundException(Biometric.class, "Baseline", "biometrics");
