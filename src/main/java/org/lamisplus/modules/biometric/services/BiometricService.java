@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class BiometricService {
+    public static final int UN_ARCHIVED = 0;
+    public static final int RECAPTURE = 0;
     private final BiometricRepository biometricRepository;
     private final BiometricDeviceRepository biometricDeviceRepository;
     private final PersonRepository personRepository;
@@ -42,7 +44,7 @@ public class BiometricService {
                 .orElseThrow(() -> new EntityNotFoundException(BiometricEnrollmentDto.class,"patientId:", ""+personId));
     
         if(biometricRepository.getBiometricByDate(person.getUuid(), LocalDate.now()) > 0){
-            throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Capture on same date");
+            throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Cannot capture on same date");
         }
         Optional<Integer> opRecapture = biometricRepository.findMaxRecapture(person.getUuid());
         Integer recapture=-1;
@@ -228,6 +230,32 @@ public class BiometricService {
     public void deleteAllPersonBiometrics(Long personId) {
         this.biometricRepository.deleteAll(this.getAllPersonBiometric(personId));
     }
+
+    public void makeBaseLine(String personUuid, LocalDate captureDate) {
+        List<Biometric> recapturedBiometrics = biometricRepository.findAllByPersonUuidAndEnrollmentDateAndArchived(personUuid, captureDate, UN_ARCHIVED);
+        List<Biometric> baselineBiometrics = biometricRepository.findAllByPersonUuidAndRecaptureAndArchived(personUuid, RECAPTURE, UN_ARCHIVED);
+
+        if(!recapturedBiometrics.isEmpty()){
+            recapturedBiometrics = recapturedBiometrics.stream()
+                    .map(biometric -> {biometric.setRecapture(0); return biometric;})
+                    .collect(Collectors.toList());
+        }else {
+            throw new EntityNotFoundException(Biometric.class, "Recapture", "biometrics");
+        }
+
+        if(!baselineBiometrics.isEmpty()){
+            baselineBiometrics = baselineBiometrics.stream()
+                    .map(biometric -> {biometric.setArchived(1); return biometric;})
+                    .collect(Collectors.toList());
+        }else {
+            throw new EntityNotFoundException(Biometric.class, "Baseline", "biometrics");
+        }
+        List<Biometric> merged = new ArrayList<>();
+        merged.addAll(recapturedBiometrics);
+        merged.addAll(baselineBiometrics);
+        biometricRepository.saveAll(merged);
+    }
+
     public void deleteBiometrics(String id) {
         Biometric biometric = biometricRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException(Biometric.class,"id:", ""+id));
@@ -252,7 +280,7 @@ public class BiometricService {
      * @return a List of a person Biometric for a specific captured instance
      */
     public List<Biometric> getBiometricsByPersonUuidAndRecapture(String personUuid, Integer recapture) {
-        List<Biometric> personBiometrics = biometricRepository.findAllByPersonUuidAndRecapture(personUuid, recapture);
+        List<Biometric> personBiometrics = biometricRepository.findAllByPersonUuidAndRecaptureAndArchived(personUuid, recapture, 0);
         return personBiometrics;
     }
 

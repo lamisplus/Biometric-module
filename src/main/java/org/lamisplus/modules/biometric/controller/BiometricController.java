@@ -9,6 +9,8 @@ import org.lamisplus.modules.biometric.services.BiometricService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -74,6 +76,12 @@ public class BiometricController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAllPersonBiometrics(@PathVariable Long personId) {
         biometricService.deleteAllPersonBiometrics (personId);
+    }
+
+    @PostMapping(BASE_URL_VERSION_ONE + "/person/{personUuid}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void makeBaseLine(@PathVariable String personUuid, @RequestParam LocalDate captureDate) {
+        biometricService.makeBaseLine (personUuid, captureDate);
     }
     @DeleteMapping(BASE_URL_VERSION_ONE + "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

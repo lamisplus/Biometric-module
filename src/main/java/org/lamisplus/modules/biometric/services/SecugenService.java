@@ -106,6 +106,7 @@ public class SecugenService {
                         this.addMessage(ERROR, biometric, FINGERPRINT_ALREADY_CAPTURED);
                         biometric.setType(BiometricEnrollmentDto.Type.ERROR);
                         LOG.info(FINGERPRINT_ALREADY_CAPTURED);
+                        return biometric;
                     }
                 }
 
@@ -202,36 +203,6 @@ public class SecugenService {
         return hasCleared;
     }
 
-
-    /*public Boolean getMatch(Set<StoredBiometric> storedBiometrics, byte[] scannedTemplate) {
-        Boolean matched = Boolean.FALSE;
-        for (StoredBiometric biometric : storedBiometrics) {
-            if (biometric.getLeftIndexFinger() != null && biometric.getLeftIndexFinger().length != 0) {
-                matched = setMatch(biometric.getLeftIndexFinger(), scannedTemplate, biometric.getPersonUuid());
-            } else if (biometric.getLeftMiddleFinger() != null && biometric.getLeftMiddleFinger().length != 0) {
-                matched = setMatch(biometric.getLeftMiddleFinger(), scannedTemplate, biometric.getPersonUuid());
-            } else if (biometric.getLeftThumb() != null && biometric.getLeftThumb().length != 0) {
-                matched = setMatch(biometric.getLeftThumb(), scannedTemplate, biometric.getPersonUuid());
-            } else if (biometric.getLeftLittleFinger() != null && biometric.getLeftLittleFinger().length != 0) {
-                matched = setMatch(biometric.getLeftLittleFinger(), scannedTemplate, biometric.getPersonUuid());
-            } else if (biometric.getLeftRingFinger() != null && biometric.getLeftRingFinger().length != 0) {
-                matched = setMatch(biometric.getLeftRingFinger(), scannedTemplate, biometric.getPersonUuid());
-            } else if (biometric.getRightIndexFinger() != null && biometric.getRightIndexFinger().length != 0) {
-                matched = setMatch(biometric.getRightIndexFinger(), scannedTemplate, biometric.getPersonUuid());
-            } else if (biometric.getRightMiddleFinger() != null && biometric.getRightMiddleFinger().length != 0) {
-                matched = setMatch(biometric.getRightMiddleFinger(), scannedTemplate, biometric.getPersonUuid());
-            } else if (biometric.getRightThumb() != null && biometric.getRightThumb().length != 0) {
-                matched = setMatch(biometric.getRightThumb(), scannedTemplate, biometric.getPersonUuid());
-            } else if (biometric.getRightRingFinger() != null && biometric.getRightRingFinger().length != 0) {
-                matched = setMatch(biometric.getRightRingFinger(), scannedTemplate, biometric.getPersonUuid());
-            } else if (biometric.getRightLittleFinger() != null && biometric.getRightLittleFinger().length != 0) {
-                matched = setMatch(biometric.getRightLittleFinger(), scannedTemplate, biometric.getPersonUuid());
-            }
-            if (matched) break;
-        }
-        return matched;
-    }*/
-
     public Boolean getMatch(Set<StoredBiometric> storedBiometrics, byte[] scannedTemplate) {
         Boolean matched = Boolean.FALSE;
         MATCHED_PERSON_UUID = null;
@@ -240,39 +211,61 @@ public class SecugenService {
                 MATCHED_PERSON_UUID = biometric.getPersonUuid();
                 //LOG.info("person biometric is {}", MATCHED_PERSON_UUID);
             }
-            if (biometric.getLeftIndexFinger() != null && biometric.getLeftIndexFinger().length != 0) {
-                matched = secugenManager.matchTemplate(biometric.getLeftIndexFinger(), scannedTemplate);
-                TEMPLATE_TYPE = LEFT_INDEX_FINGER;
-            } else if (biometric.getLeftMiddleFinger() != null && biometric.getLeftMiddleFinger().length != 0) {
+            if (biometric.getLeftMiddleFinger() != null && biometric.getLeftMiddleFinger().length != 0) {
+                if(matched)break;
                 matched = secugenManager.matchTemplate(biometric.getLeftMiddleFinger(), scannedTemplate);
                 TEMPLATE_TYPE = LEFT_MIDDLE_FINGER;
-            } else if (biometric.getLeftThumb() != null && biometric.getLeftThumb().length != 0) {
+            }
+            if (biometric.getLeftIndexFinger() != null && biometric.getLeftIndexFinger().length != 0) {
+                if(matched)break;
+                matched = secugenManager.matchTemplate(biometric.getLeftIndexFinger(), scannedTemplate);
+                TEMPLATE_TYPE = LEFT_INDEX_FINGER;
+            }
+            if (biometric.getLeftMiddleFinger() != null && biometric.getLeftMiddleFinger().length != 0) {
+                if(matched)break;
+                matched = secugenManager.matchTemplate(biometric.getLeftMiddleFinger(), scannedTemplate);
+                TEMPLATE_TYPE = LEFT_MIDDLE_FINGER;
+            }
+            if (biometric.getLeftThumb() != null && biometric.getLeftThumb().length != 0) {
+                if(matched)break;
                 matched =  secugenManager.matchTemplate(biometric.getLeftThumb(), scannedTemplate);
                 TEMPLATE_TYPE = LEFT_THUMB;
-            } else if (biometric.getLeftLittleFinger() != null && biometric.getLeftLittleFinger().length != 0) {
+            }
+            if (biometric.getLeftLittleFinger() != null && biometric.getLeftLittleFinger().length != 0) {
+                if(matched)break;
                 matched = secugenManager.matchTemplate(biometric.getLeftLittleFinger(), scannedTemplate);
                 TEMPLATE_TYPE = LEFT_LITTLE_FINGER;
-            } else if (biometric.getLeftRingFinger() != null && biometric.getLeftRingFinger().length != 0) {
+            }
+            if (biometric.getLeftRingFinger() != null && biometric.getLeftRingFinger().length != 0) {
+                if(matched)break;
                 matched =  secugenManager.matchTemplate(biometric.getLeftRingFinger(), scannedTemplate);
                 TEMPLATE_TYPE = LEFT_RING_FINGER;
-            } else if (biometric.getRightIndexFinger() != null && biometric.getRightIndexFinger().length != 0) {
+            }
+            if (biometric.getRightIndexFinger() != null && biometric.getRightIndexFinger().length != 0) {
+                if(matched)break;
                 matched =  secugenManager.matchTemplate(biometric.getRightIndexFinger(), scannedTemplate);
                 TEMPLATE_TYPE = RIGHT_INDEX_FINGER;
-            } else if (biometric.getRightMiddleFinger() != null && biometric.getRightMiddleFinger().length != 0) {
+            }
+            if (biometric.getRightMiddleFinger() != null && biometric.getRightMiddleFinger().length != 0) {
+                if(matched)break;
                 matched =  secugenManager.matchTemplate(biometric.getRightMiddleFinger(), scannedTemplate);
                 TEMPLATE_TYPE = RIGHT_MIDDLE_FINGER;
-            } else if (biometric.getRightThumb() != null && biometric.getRightThumb().length != 0) {
+            }
+            if (biometric.getRightThumb() != null && biometric.getRightThumb().length != 0) {
+                if(matched)break;
                 matched =  secugenManager.matchTemplate(biometric.getRightThumb(), scannedTemplate);
                 TEMPLATE_TYPE = RIGHT_THUMB;
-            } else if (biometric.getRightRingFinger() != null && biometric.getRightRingFinger().length != 0) {
+            }
+            if (biometric.getRightRingFinger() != null && biometric.getRightRingFinger().length != 0) {
+                if(matched)break;
                 matched =  secugenManager.matchTemplate(biometric.getRightRingFinger(), scannedTemplate);
                 TEMPLATE_TYPE = RIGHT_RING_FINGER;
-            } else if (biometric.getRightLittleFinger() != null && biometric.getRightLittleFinger().length != 0) {
+            }
+            if (biometric.getRightLittleFinger() != null && biometric.getRightLittleFinger().length != 0) {
+                if(matched)break;
                 matched =  secugenManager.matchTemplate(biometric.getRightLittleFinger(), scannedTemplate);
                 TEMPLATE_TYPE = RIGHT_LITTLE_FINGER;
             }
-
-            if(matched)break;
         }
         return matched;
     }
