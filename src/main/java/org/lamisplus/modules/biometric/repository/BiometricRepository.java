@@ -118,7 +118,7 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     List<Biometric> findAllByPersonUuidAndRecapture(String personUuid, Integer recapture);
 
     List<Biometric> findAllByPersonUuidAndRecaptureAndArchived(String personUuid, Integer recapture, Integer archive);
-    List<Biometric> findAllByPersonUuidAndEnrollmentDateAndArchived(String personUuid, LocalDate captureDate, Integer archive);
+    List<Biometric> findAllByPersonUuidAndDateAndArchived(String personUuid, LocalDate captureDate, Integer archive);
 
 
     @Query(value="SELECT id, first_name AS firstName, surname FROM patient_person WHERE person_uuid=?1", nativeQuery = true)

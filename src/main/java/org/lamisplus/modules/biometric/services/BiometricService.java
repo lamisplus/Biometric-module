@@ -233,7 +233,7 @@ public class BiometricService {
     }
 
     public void makeBaseLine(String personUuid, LocalDate captureDate) {
-        List<Biometric> recapturedBiometrics = biometricRepository.findAllByPersonUuidAndEnrollmentDateAndArchived(personUuid, captureDate, UN_ARCHIVED);
+        List<Biometric> recapturedBiometrics = biometricRepository.findAllByPersonUuidAndDateAndArchived(personUuid, captureDate, UN_ARCHIVED);
         List<Biometric> baselineBiometrics = biometricRepository.findAllByPersonUuidAndRecaptureAndArchived(personUuid, RECAPTURE, UN_ARCHIVED);
 
         if(!recapturedBiometrics.isEmpty()){

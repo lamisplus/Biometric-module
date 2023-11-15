@@ -78,9 +78,9 @@ public class BiometricController {
         biometricService.deleteAllPersonBiometrics (personId);
     }
 
-    @PostMapping(BASE_URL_VERSION_ONE + "/person/{personUuid}")
+    @PutMapping(BASE_URL_VERSION_ONE + "/person")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void makeBaseLine(@PathVariable String personUuid, @RequestParam LocalDate captureDate) {
+    public void makeBaseLine(@RequestParam String personUuid, @RequestParam LocalDate captureDate) {
         biometricService.makeBaseLine (personUuid, captureDate);
     }
     @DeleteMapping(BASE_URL_VERSION_ONE + "/{id}")
