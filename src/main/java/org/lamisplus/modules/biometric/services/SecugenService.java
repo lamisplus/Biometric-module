@@ -65,7 +65,7 @@ public class SecugenService {
         BiometricEnrollmentDto biometric = getBiometricEnrollmentDto(captureRequestDTO);
 
         if(biometric.getMessage() == null)biometric.setMessage(new HashMap<>());
-
+            // checks if the secugen device is active
         if (this.scannerIsNotSet(reader)) {
             biometric.getMessage().put(ERROR_MESSAGE, "READER NOT AVAILABLE");
             biometric.setType(BiometricEnrollmentDto.Type.ERROR);
