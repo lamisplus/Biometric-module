@@ -25,6 +25,7 @@ public class SecugenService {
     public static final String ERROR_MESSAGE = "ERROR";
     public static final String MATCH = "match";
     public static final String RECAPTURE_MESSAGE = "RECAPTURE_MESSAGE";
+    public static final int RECAPTURE = 0;
     public static Integer totalPage=0;
     public static final String WARNING = "WARNING";
     public static final String RECAPTURE_NO_BASELINE = "No baseline biometrics for recapturing\nFingerprint exist but not same patient";
@@ -99,15 +100,14 @@ public class SecugenService {
 
             AtomicReference<Boolean> matched = new AtomicReference<>(false);
             if (biometric.getTemplate().length > 200 && biometric.getMainImageQuality() >= IMAGE_QUALITY ) {
-                Set<StoredBiometric> biometricsInFacility;
+                Set<StoredBiometric> biometricsInFacility = biometricRepository
+                        .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), template);
 
                 //recapture
                 if(recapture) {
                     Optional<String> optionalPersonUuid= biometricRepository.getPersonUuid(captureRequestDTO.getPatientId());
-                    recaptureOrIdentify(true, optionalPersonUuid, biometric);
+                    recaptureOrIdentify(true, optionalPersonUuid, template, biometric);
                 }else {
-                    biometricsInFacility = biometricRepository
-                            .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), template);
                     if(getMatch(biometricsInFacility, biometric.getTemplate())){
                         this.addMessage(ERROR_MESSAGE, biometric, FINGERPRINT_ALREADY_CAPTURED);
                         biometric.setType(BiometricEnrollmentDto.Type.ERROR);
@@ -384,21 +384,22 @@ public class SecugenService {
          */
     private BiometricEnrollmentDto recaptureOrIdentify(Boolean recapture,
                                         Optional<String> optionalPersonUuid,
+                                        String template,
                                         BiometricEnrollmentDto biometricEnrollmentDto){
         if(recapture) {
             HashMap<String, String> mapDetails = new HashMap<>();
+            String personUuid = optionalPersonUuid.get();
             Set<StoredBiometric> personBiometrics = biometricRepository.findByFacilityIdWithTemplateAndPersonUuid(facility.getCurrentUserOrganization(),
-                    optionalPersonUuid.get(), 0, biometricEnrollmentDto.getTemplateType());
-
+                    personUuid, RECAPTURE, template);
             if (!personBiometrics.isEmpty()) {
                 if (getMatch(personBiometrics, biometricEnrollmentDto.getTemplate())) {
                     biometricEnrollmentDto.setMatch(true);
-                    LOG.info("person uuid match- {}", optionalPersonUuid.get());
-                    if (TEMPLATE_TYPE.equalsIgnoreCase(biometricEnrollmentDto.getBiometricType())) {
+                    if (TEMPLATE_TYPE.equalsIgnoreCase(biometricEnrollmentDto.getTemplateType())) {
                         LOG.info("Perfect match...");
                         biometricEnrollmentDto.getMessage().put(MATCH, "Perfect...");
                         biometricEnrollmentDto.setType(BiometricEnrollmentDto.Type.SUCCESS);
                         biometricEnrollmentDto.getMessage().put(RECAPTURE_MESSAGE, "SUCCESSFULLY RECAPTURED, PERFECT MATCH");
+                        return biometricEnrollmentDto;
     
                     } else {
                         LOG.info("Imperfect match...");
@@ -421,13 +422,14 @@ public class SecugenService {
                         }else {
                             deduplication.setDeduplicationDate(LocalDate.now());
                         }
+                        return biometricEnrollmentDto;
                     }
-                }else {
-                    biometricEnrollmentDto.setType(BiometricEnrollmentDto.Type.ERROR);
-                    biometricEnrollmentDto.getMessage().put(MATCH, "Not Found...");
-                    biometricEnrollmentDto.getMessage().put(RECAPTURE_MESSAGE, "NO BASELINE FOR RECAPTURE");
                 }
             }
+            LOG.info("no match...");
+            biometricEnrollmentDto.setType(BiometricEnrollmentDto.Type.ERROR);
+            biometricEnrollmentDto.getMessage().put(MATCH, "Not Found...");
+            biometricEnrollmentDto.getMessage().put(RECAPTURE_MESSAGE, "NO BASELINE FOR RECAPTURE");
         }
         return biometricEnrollmentDto;
     }
