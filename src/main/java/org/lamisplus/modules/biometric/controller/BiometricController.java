@@ -9,6 +9,8 @@ import org.lamisplus.modules.biometric.services.BiometricService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -19,8 +21,9 @@ public class BiometricController {
     //Versioning through URI Path
     private final String BASE_URL_VERSION_ONE = "/api/v1/biometrics";
     @PostMapping(BASE_URL_VERSION_ONE + "/templates")
-    public ResponseEntity<BiometricDto> saveBiometricTemplate(@RequestBody BiometricEnrollmentDto biometrics) {
-        return ResponseEntity.ok (biometricService.biometricEnrollment (biometrics));
+    public ResponseEntity<BiometricDto> saveBiometricTemplate(@RequestBody BiometricEnrollmentDto biometrics,
+                                                              @RequestParam (required = false, defaultValue = "false") boolean isMobile) {
+        return ResponseEntity.ok (biometricService.biometricEnrollment (biometrics, isMobile));
     }
     @GetMapping(BASE_URL_VERSION_ONE + "/patient/{id}")
     public ResponseEntity<CapturedBiometricDTOS> findByPatient(@PathVariable Long id) {
@@ -43,8 +46,9 @@ public class BiometricController {
     }
 
     @PutMapping(BASE_URL_VERSION_ONE + "/person/{personId}")
-    public ResponseEntity<BiometricDto> updatePersonBiometric(@PathVariable Long personId, @RequestBody BiometricEnrollmentDto biometricEnrollmentDto) {
-        return ResponseEntity.ok (biometricService.updatePersonBiometric (personId, biometricEnrollmentDto));
+    public ResponseEntity<BiometricDto> updatePersonBiometric(@PathVariable Long personId, @RequestBody BiometricEnrollmentDto biometricEnrollmentDto,
+                                                              @RequestParam (required = false, defaultValue = "false") boolean isMobile) {
+        return ResponseEntity.ok (biometricService.updatePersonBiometric (personId, biometricEnrollmentDto, isMobile));
     }
     @DeleteMapping(BASE_URL_VERSION_ONE + "/device/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -72,6 +76,12 @@ public class BiometricController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAllPersonBiometrics(@PathVariable Long personId) {
         biometricService.deleteAllPersonBiometrics (personId);
+    }
+
+    @PutMapping(BASE_URL_VERSION_ONE + "/person")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void makeBaseLine(@RequestParam String personUuid, @RequestParam LocalDate captureDate) {
+        biometricService.makeBaseLine (personUuid, captureDate);
     }
     @DeleteMapping(BASE_URL_VERSION_ONE + "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -6,6 +6,7 @@ import org.lamisplus.modules.biometric.domain.Deduplication;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,5 +39,6 @@ public class BiometricEnrollmentDto implements Serializable {
     private String hashed;
     private boolean match;
     private Deduplication deduplication;
+    private LocalDate enrollmentDate;
     private ClientIdentificationDTO clientIdentificationDTO;
 }
