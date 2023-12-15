@@ -2,6 +2,7 @@ package org.lamisplus.modules.biometric.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.base.controller.apierror.IllegalTypeException;
@@ -9,9 +10,11 @@ import org.lamisplus.modules.base.domain.entities.User;
 import org.lamisplus.modules.base.service.UserService;
 import org.lamisplus.modules.biometric.domain.Biometric;
 import org.lamisplus.modules.biometric.domain.BiometricDevice;
+import org.lamisplus.modules.biometric.domain.Deduplication;
 import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.repository.BiometricDeviceRepository;
 import org.lamisplus.modules.biometric.repository.BiometricRepository;
+import org.lamisplus.modules.biometric.repository.DeduplicationRepository;
 import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.patient.repository.PersonRepository;
 import org.springframework.stereotype.Service;
@@ -24,34 +27,62 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class BiometricService {
+    public static final int UN_ARCHIVED = 0;
+    public static final int RECAPTURE = 0;
+    public static final int ARCHIVED = 1;
     private final BiometricRepository biometricRepository;
     private final BiometricDeviceRepository biometricDeviceRepository;
     private final PersonRepository personRepository;
     private  final UserService userService;
+    private final DeduplicationRepository deduplicationRepository;
 
-    public BiometricDto biometricEnrollment(BiometricEnrollmentDto biometricEnrollmentDto) {
+    public BiometricDto biometricEnrollment(BiometricEnrollmentDto biometricEnrollmentDto, Boolean isMobile) {
         if(biometricEnrollmentDto.getType().equals(BiometricEnrollmentDto.Type.ERROR)){
             //IllegalTypeException
             throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Type is Error");
         }
+        
+        
         Long personId = biometricEnrollmentDto.getPatientId ();
         Person person = personRepository.findById (personId)
                 .orElseThrow(() -> new EntityNotFoundException(BiometricEnrollmentDto.class,"patientId:", ""+personId));
-
+    
+        if(biometricRepository.getBiometricByDate(person.getUuid(), LocalDate.now()) > 0){
+            throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Cannot capture on same date");
+        }
         Optional<Integer> opRecapture = biometricRepository.findMaxRecapture(person.getUuid());
         Integer recapture=-1;
         if(opRecapture.isPresent())recapture=Integer.valueOf(opRecapture.get());
         Integer recap = ++recapture;
         String biometricType = biometricEnrollmentDto.getBiometricType ();
+        LocalDate enrollmentDate = (isMobile && biometricEnrollmentDto.getEnrollmentDate() != null)? biometricEnrollmentDto.getEnrollmentDate() : LocalDate.now();
         String deviceName = biometricEnrollmentDto.getDeviceName ();
         String reason = biometricEnrollmentDto.getReason();
         List<CapturedBiometricDto> capturedBiometricsList = biometricEnrollmentDto.getCapturedBiometricsList ();
         List<Biometric> biometrics = capturedBiometricsList.stream ()
                 .map (capturedBiometricDto -> convertDtoToEntity (capturedBiometricDto, person, biometricType, deviceName,
                         reason, capturedBiometricDto.getImageQuality(),
-                        recap, biometricEnrollmentDto.getRecaptureMessage(), capturedBiometricsList.size()))
+                        recap, biometricEnrollmentDto.getRecaptureMessage(), capturedBiometricsList.size(), enrollmentDate, isMobile))
                 .collect (Collectors.toList ());
         biometricRepository.saveAll (biometrics);
+
+        if(biometricEnrollmentDto.getDeduplication() != null){
+            LOG.info("Deduplication Data ***** {}", biometricEnrollmentDto.getDeduplication());
+            Deduplication deduplication = new Deduplication();
+
+            deduplication.setPersonUuid(person.getUuid());
+            deduplication.setDetails(biometricEnrollmentDto.getDeduplication().getDetails());
+            deduplication.setImperfectMatchCount(biometricEnrollmentDto.getDeduplication().getImperfectMatchCount());
+            deduplication.setPerfectMatchCount(biometricEnrollmentDto.getDeduplication().getPerfectMatchCount());
+            deduplication.setBaselineFingerCount(biometricEnrollmentDto.getDeduplication().getBaselineFingerCount());
+            deduplication.setRecaptureFingerCount(biometricEnrollmentDto.getDeduplication().getRecaptureFingerCount());
+            deduplication.setUnmatchedCount(biometricEnrollmentDto.getDeduplication().getUnmatchedCount());
+            deduplication.setMatchedCount(biometricEnrollmentDto.getDeduplication().getMatchedCount());
+            deduplication.setDeduplicationDate(enrollmentDate);
+
+            // Saving recapture fingerprints deduplication information
+            deduplicationRepository.save(deduplication);
+        }
         return getBiometricDto (biometrics, personId);
     }
     public CapturedBiometricDTOS getByPersonId(Long personId) {
@@ -129,7 +160,7 @@ public class BiometricService {
             CapturedBiometricDto capturedBiometricDto,
             Person person, String biometricType,
             String deviceName, String reason, int imageQuality,
-            Integer recapture, String recaptureMessage, Integer count) {
+            Integer recapture, String recaptureMessage, Integer count, LocalDate date, Boolean isMobile) {
         Biometric biometric = new Biometric ();
         biometric.setId (UUID.randomUUID ().toString ());
         biometric.setBiometricType (biometricType);
@@ -137,7 +168,7 @@ public class BiometricService {
         biometric.setTemplate (capturedBiometricDto.getTemplate ());
         biometric.setTemplateType (capturedBiometricDto.getTemplateType ());
         if(capturedBiometricDto.getHashed() != null)biometric.setHashed(capturedBiometricDto.getHashed());
-        biometric.setDate (LocalDate.now ());
+        biometric.setDate (date);
         biometric.setIso (true);
         biometric.setReason(reason);
         biometric.setVersionIso20(true);
@@ -203,9 +234,9 @@ public class BiometricService {
         return biometricDeviceRepository.findAll();
     }
 
-    public BiometricDto updatePersonBiometric(Long personId, BiometricEnrollmentDto biometricEnrollmentDto) {
+    public BiometricDto updatePersonBiometric(Long personId, BiometricEnrollmentDto biometricEnrollmentDto, Boolean isMobile) {
         biometricRepository.deleteAll(this.getPersonBiometrics(personId));
-        return biometricEnrollment(biometricEnrollmentDto);
+        return biometricEnrollment(biometricEnrollmentDto, isMobile);
     }
     public List<Biometric> getAllPersonBiometric(Long personId) {
         List<Biometric> personBiometrics = this.getPersonBiometrics(personId);
@@ -221,6 +252,32 @@ public class BiometricService {
     public void deleteAllPersonBiometrics(Long personId) {
         this.biometricRepository.deleteAll(this.getAllPersonBiometric(personId));
     }
+
+    public void makeBaseLine(String personUuid, LocalDate captureDate) {
+        List<Biometric> recapturedBiometrics = biometricRepository.findAllByPersonUuidAndDateAndArchived(personUuid, captureDate, UN_ARCHIVED);
+        List<Biometric> baselineBiometrics = biometricRepository.findAllByPersonUuidAndRecaptureAndArchived(personUuid, RECAPTURE, UN_ARCHIVED);
+
+        if(!recapturedBiometrics.isEmpty()){
+            recapturedBiometrics = recapturedBiometrics.stream()
+                    .map(biometric -> {biometric.setRecapture(RECAPTURE); return biometric;})
+                    .collect(Collectors.toList());
+        }else {
+            throw new EntityNotFoundException(Biometric.class, "Recapture", "biometrics");
+        }
+
+        if(!baselineBiometrics.isEmpty()){
+            baselineBiometrics = baselineBiometrics.stream()
+                    .map(biometric -> {biometric.setArchived(ARCHIVED); return biometric;})
+                    .collect(Collectors.toList());
+        }else {
+            throw new EntityNotFoundException(Biometric.class, "Baseline", "biometrics");
+        }
+        List<Biometric> merged = new ArrayList<>();
+        merged.addAll(recapturedBiometrics);
+        merged.addAll(baselineBiometrics);
+        biometricRepository.saveAll(merged);
+    }
+
     public void deleteBiometrics(String id) {
         Biometric biometric = biometricRepository.findById(id)
                 .orElseThrow(()-> new EntityNotFoundException(Biometric.class,"id:", ""+id));
@@ -245,7 +302,7 @@ public class BiometricService {
      * @return a List of a person Biometric for a specific captured instance
      */
     public List<Biometric> getBiometricsByPersonUuidAndRecapture(String personUuid, Integer recapture) {
-        List<Biometric> personBiometrics = biometricRepository.findAllByPersonUuidAndRecapture(personUuid, recapture);
+        List<Biometric> personBiometrics = biometricRepository.findAllByPersonUuidAndRecaptureAndArchived(personUuid, recapture, 0);
         return personBiometrics;
     }
 
