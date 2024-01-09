@@ -129,10 +129,12 @@ public class SecugenService {
                             .flatMap(Collection::stream)
                             .collect(Collectors.toList());
 
-                    for (CapturedBiometricDto capturedBiometricsDTO : capturedBiometricsListDTO) {
-                        matched.set(secugenManager.matchTemplate(capturedBiometricsDTO.getTemplate(), biometric.getTemplate()));
-                        if (matched.get()) {
-                            return this.addMessage(ERROR_MESSAGE, biometric, "Fingerprint already captured");
+                    if(!recapture) {
+                        for (CapturedBiometricDto capturedBiometricsDTO : capturedBiometricsListDTO) {
+                            matched.set(secugenManager.matchTemplate(capturedBiometricsDTO.getTemplate(), biometric.getTemplate()));
+                            if (matched.get()) {
+                                return this.addMessage(ERROR_MESSAGE, biometric, "Fingerprint already captured");
+                            }
                         }
                     }
                 } else {
