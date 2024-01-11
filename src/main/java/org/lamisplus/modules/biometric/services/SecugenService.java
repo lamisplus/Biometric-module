@@ -436,7 +436,7 @@ public class SecugenService {
                 }
             }
             LOG.info("no match...");
-            biometricEnrollmentDto.setType(BiometricEnrollmentDto.Type.ERROR);
+            biometricEnrollmentDto.setType(BiometricEnrollmentDto.Type.WARNING);
             biometricEnrollmentDto.getMessage().put(MATCH, "Biometric not found...");
             biometricEnrollmentDto.getMessage().put(RECAPTURE_MESSAGE, "NO MATCH...");
         }
