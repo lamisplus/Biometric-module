@@ -92,9 +92,13 @@ public class SecugenService {
             String template = Integer.toHexString(firstTwoChar)+"%";
 
             if(!identify) {
-                captureRequestDTO.getCapturedBiometricsList().forEach(capturedBiometricDto -> {
-                    BiometricStoreDTO.addCapturedBiometrics(captureRequestDTO.getPatientId(), capturedBiometricDto);
-                });
+                if(captureRequestDTO.getCapturedBiometricsList() != null && !captureRequestDTO.getCapturedBiometricsList().isEmpty()) {
+                    captureRequestDTO.getCapturedBiometricsList().forEach(capturedBiometricDto -> {
+                        if(captureRequestDTO.getPatientId() != null) {
+                            BiometricStoreDTO.addCapturedBiometrics(captureRequestDTO.getPatientId(), capturedBiometricDto);
+                        }
+                    });
+                }
             } else if(identify){
                 biometric.setClientIdentificationDTO(identify(reader));
                 return biometric;
@@ -111,6 +115,7 @@ public class SecugenService {
                 if(recapture) {
                     Optional<String> optionalPersonUuid= biometricRepository.getPersonUuid(captureRequestDTO.getPatientId());
                     recaptureOrIdentify(true, optionalPersonUuid, template, biometric);
+                    LOG.info("Type is {}", BiometricEnrollmentDto.Type.values());
                 }else {
                     if(getMatch(biometricsInFacility, biometric.getTemplate())){
                         this.addMessage(ERROR_MESSAGE, biometric, FINGERPRINT_ALREADY_CAPTURED);
