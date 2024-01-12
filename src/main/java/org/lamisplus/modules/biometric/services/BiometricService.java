@@ -19,6 +19,7 @@ import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.patient.repository.PersonRepository;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -226,9 +227,11 @@ public class BiometricService {
                 .orElseThrow(()-> new EntityNotFoundException(BiometricDevice.class, "id", ""+id));
         biometricDeviceRepository.delete(biometricDevice);
     }
-
     public List<BiometricDevice> getAllBiometricDevices(boolean active){
         if(active){
+
+            //update biometric recapture column to base line
+            biometricRepository.updateRecaptureNullField();
             return biometricDeviceRepository.getAllByActiveIsTrue();
         }
         return biometricDeviceRepository.findAll();
