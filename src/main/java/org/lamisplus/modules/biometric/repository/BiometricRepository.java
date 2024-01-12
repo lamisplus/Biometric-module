@@ -61,7 +61,7 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
             "            string_agg((CASE template_type WHEN 'Left Little Finger' THEN template END), '') AS leftLittleFinger \n" +
             "            From biometric WHERE facility_id=?1 AND ENCODE(CAST(template AS BYTEA), 'hex') LIKE ?2 AND archived=0" +
             " GROUP BY person_uuid, recapture", nativeQuery = true)
-    Set<StoredBiometric> findByFacilityIdWithTemplate(Long facilityId, String template);
+    List<StoredBiometric> findByFacilityIdWithTemplate(Long facilityId, String template);
 
     @Query(value="SELECT person_uuid AS personUuid, recapture, string_agg((CASE template_type WHEN 'Right Middle Finger' THEN template END), '') AS rightMiddleFinger,   \n" +
             "                string_agg((CASE template_type WHEN 'Right Thumb' THEN template END), '') AS rightThumb,  \n" +
@@ -97,7 +97,7 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
             "            From biometric WHERE facility_id=?1 AND person_uuid=?2 AND recapture=?3 " +
             "AND ENCODE(CAST(template AS BYTEA), 'hex') LIKE ?4 and archived=0" +
             " GROUP BY person_uuid, recapture", nativeQuery = true)
-    Set<StoredBiometric> findByFacilityIdWithTemplateAndPersonUuid(Long facilityId, String personUuid, Integer recapture, String template);
+    List<StoredBiometric> findByFacilityIdWithTemplateAndPersonUuid(Long facilityId, String personUuid, Integer recapture, String template);
 
 
 

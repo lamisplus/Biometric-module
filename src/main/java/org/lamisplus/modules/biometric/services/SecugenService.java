@@ -25,6 +25,7 @@ public class SecugenService {
     public static final String ERROR_MESSAGE = "ERROR";
     public static final String MATCH = "match";
     public static final String RECAPTURE_MESSAGE = "RECAPTURE_MESSAGE";
+    private static List<StoredBiometric> biometricsInFacility = new ArrayList<>();
     public static final int RECAPTURE = 0;
     public static Integer totalPage=0;
     public static final String WARNING = "WARNING";
@@ -61,6 +62,7 @@ public class SecugenService {
         if(isNew){
             //clear store
             this.emptyStoreByPersonId(captureRequestDTO.getPatientId());
+            if(!biometricsInFacility.isEmpty()) biometricsInFacility.clear();
         }
 
         BiometricEnrollmentDto biometric = getBiometricEnrollmentDto(captureRequestDTO);
@@ -100,8 +102,10 @@ public class SecugenService {
 
             AtomicReference<Boolean> matched = new AtomicReference<>(false);
             if (biometric.getTemplate().length > 200 && biometric.getMainImageQuality() >= IMAGE_QUALITY ) {
-                Set<StoredBiometric> biometricsInFacility = biometricRepository
-                        .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), template);
+                if(biometricsInFacility.isEmpty()) {
+                    biometricsInFacility = biometricRepository
+                            .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), template);
+                }
 
                 //recapture
                 if(recapture) {
@@ -245,12 +249,13 @@ public class SecugenService {
      * @param scannedTemplate
      * @return Boolean
      */
-    public Boolean getMatch(Set<StoredBiometric> storedBiometrics, byte[] scannedTemplate) {
+    public Boolean getMatch(List<StoredBiometric> storedBiometrics, byte[] scannedTemplate) {
         Boolean matched = Boolean.FALSE;
         MATCHED_PERSON_UUID = null;
         for (StoredBiometric biometric : storedBiometrics) {
             if(null != biometric.getPersonUuid()) {
                 MATCHED_PERSON_UUID = biometric.getPersonUuid();
+                LOG.info("MATCHED_PERSON_UUID {}", MATCHED_PERSON_UUID);
             }
             if (biometric.getLeftMiddleFinger() != null && biometric.getLeftMiddleFinger().length != 0) {
                 if(matched)break;
@@ -332,6 +337,8 @@ public class SecugenService {
      * @return ClientIdentificationDTO
      */
     public ClientIdentificationDTO identify(String reader){
+        //clear if not empty
+        if(!biometricsInFacility.isEmpty())biometricsInFacility.clear();
         if (this.scannerIsNotSet(reader)) {
             throw new EntityNotFoundException(Biometric.class, "Scanner", "Scanner");
         }
@@ -341,8 +348,8 @@ public class SecugenService {
         //String template = "46% OR AC%";
         String template = Integer.toHexString(firstTwoChar)+"%";
         LOG.info("level 2 ...");
-        Set<StoredBiometric> biometricsInFacility = biometricRepository
-                .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), template);
+        biometricsInFacility = biometricRepository
+                    .findByFacilityIdWithTemplate(facility.getCurrentUserOrganization(), template);
         LOG.info("level 3 ...");
         if(getMatch(biometricsInFacility, biometric.getTemplate())){
             if (MATCHED_PERSON_UUID != null) {
@@ -389,7 +396,7 @@ public class SecugenService {
         if(recapture) {
             HashMap<String, String> mapDetails = new HashMap<>();
             String personUuid = optionalPersonUuid.get();
-            Set<StoredBiometric> personBiometrics = biometricRepository.findByFacilityIdWithTemplateAndPersonUuid(facility.getCurrentUserOrganization(),
+            List<StoredBiometric> personBiometrics = biometricRepository.findByFacilityIdWithTemplateAndPersonUuid(facility.getCurrentUserOrganization(),
                     personUuid, RECAPTURE, template);
             if (!personBiometrics.isEmpty()) {
                 if (getMatch(personBiometrics, biometricEnrollmentDto.getTemplate())) {
@@ -428,8 +435,8 @@ public class SecugenService {
             }
             LOG.info("no match...");
             biometricEnrollmentDto.setType(BiometricEnrollmentDto.Type.ERROR);
-            biometricEnrollmentDto.getMessage().put(MATCH, "Not Found...");
-            biometricEnrollmentDto.getMessage().put(RECAPTURE_MESSAGE, "NO BASELINE FOR RECAPTURE");
+            biometricEnrollmentDto.getMessage().put(MATCH, "Biometric not found...");
+            biometricEnrollmentDto.getMessage().put(RECAPTURE_MESSAGE, "NO MATCH...");
         }
         return biometricEnrollmentDto;
     }
