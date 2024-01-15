@@ -27,9 +27,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class BiometricService {
-    public static final int UN_ARCHIVED = 0;
-    public static final int RECAPTURE = 0;
-    public static final int ARCHIVED = 1;
+    private static final int UN_ARCHIVED = 0;
+    private static final int RECAPTURE = 0;
+    private static final int ARCHIVED = 1;
+    private static final int BIOMETRIC_SIZE = 6;
     private final BiometricRepository biometricRepository;
     private final BiometricDeviceRepository biometricDeviceRepository;
     private final PersonRepository personRepository;
@@ -37,6 +38,10 @@ public class BiometricService {
     private final DeduplicationRepository deduplicationRepository;
 
     public BiometricDto biometricEnrollment(BiometricEnrollmentDto biometricEnrollmentDto, Boolean isMobile) {
+        if(biometricEnrollmentDto.getCapturedBiometricsList().size() < BIOMETRIC_SIZE){
+            throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Biometric template is less than 6");
+        }
+
         if(biometricEnrollmentDto.getType().equals(BiometricEnrollmentDto.Type.ERROR)){
             //IllegalTypeException
             throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Type is Error");
