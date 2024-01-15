@@ -10,9 +10,11 @@ import org.lamisplus.modules.base.domain.entities.User;
 import org.lamisplus.modules.base.service.UserService;
 import org.lamisplus.modules.biometric.domain.Biometric;
 import org.lamisplus.modules.biometric.domain.BiometricDevice;
+import org.lamisplus.modules.biometric.domain.Deduplication;
 import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.repository.BiometricDeviceRepository;
 import org.lamisplus.modules.biometric.repository.BiometricRepository;
+import org.lamisplus.modules.biometric.repository.DeduplicationRepository;
 import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.patient.repository.PersonRepository;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class BiometricService {
     private final BiometricDeviceRepository biometricDeviceRepository;
     private final PersonRepository personRepository;
     private  final UserService userService;
+    private final DeduplicationRepository deduplicationRepository;
 
     public BiometricDto biometricEnrollment(BiometricEnrollmentDto biometricEnrollmentDto, Boolean isMobile) {
         if(biometricEnrollmentDto.getCapturedBiometricsList().size() < BIOMETRIC_SIZE){
@@ -67,6 +70,24 @@ public class BiometricService {
                         recap, biometricEnrollmentDto.getRecaptureMessage(), capturedBiometricsList.size(), enrollmentDate, isMobile))
                 .collect (Collectors.toList ());
         biometricRepository.saveAll (biometrics);
+
+        if(biometricEnrollmentDto.getDeduplication() != null){
+            LOG.info("Deduplication Data ***** {}", biometricEnrollmentDto.getDeduplication());
+            Deduplication deduplication = new Deduplication();
+
+            deduplication.setPersonUuid(person.getUuid());
+            deduplication.setDetails(biometricEnrollmentDto.getDeduplication().getDetails());
+            deduplication.setImperfectMatchCount(biometricEnrollmentDto.getDeduplication().getImperfectMatchCount());
+            deduplication.setPerfectMatchCount(biometricEnrollmentDto.getDeduplication().getPerfectMatchCount());
+            deduplication.setBaselineFingerCount(biometricEnrollmentDto.getDeduplication().getBaselineFingerCount());
+            deduplication.setRecaptureFingerCount(biometricEnrollmentDto.getDeduplication().getRecaptureFingerCount());
+            deduplication.setUnmatchedCount(biometricEnrollmentDto.getDeduplication().getUnmatchedCount());
+            deduplication.setMatchedCount(biometricEnrollmentDto.getDeduplication().getMatchedCount());
+            deduplication.setDeduplicationDate(enrollmentDate);
+
+            // Saving recapture fingerprints deduplication information
+            deduplicationRepository.save(deduplication);
+        }
         return getBiometricDto (biometrics, personId);
     }
     public CapturedBiometricDTOS getByPersonId(Long personId) {
