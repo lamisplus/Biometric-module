@@ -124,9 +124,9 @@
     "yup": "^0.32.8"
   },
   "scripts": {
-    "start": "react-scripts --max-old-space-size=8096 start",
+    "start": "react-scripts start",
     "jsreport": "jsreport-start",
-    "build": "react-scripts --max-old-space-size=8096 build && xcopy /s /y build src\\main\\resources\\views\\static\\biometric",
+    "build": "react-scripts build && xcopy /s /y build src\\main\\resources\\views\\static\\biometric",
     "serve": "serve -s build",
     "run-build": "react-scripts build && serve",
     "test": "react-scripts test --env=jsdom",
