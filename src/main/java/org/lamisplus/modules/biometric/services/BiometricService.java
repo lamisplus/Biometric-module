@@ -168,7 +168,13 @@ public class BiometricService {
             String deviceName, String reason, int imageQuality,
             Integer recapture, String recaptureMessage, Integer count, LocalDate date, Boolean isMobile) {
         Biometric biometric = new Biometric ();
-        biometric.setId (UUID.randomUUID ().toString ());
+//        check for mobile Id exist
+        if (capturedBiometricDto.getId() != null && isMobile) {
+            biometric.setId (capturedBiometricDto.getId());
+        }else{
+            biometric.setId (UUID.randomUUID ().toString ());
+        }
+
         biometric.setBiometricType (biometricType);
         biometric.setDeviceName (deviceName);
         biometric.setTemplate (capturedBiometricDto.getTemplate ());
