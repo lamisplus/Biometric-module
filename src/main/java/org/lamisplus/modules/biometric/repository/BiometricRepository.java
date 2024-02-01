@@ -9,8 +9,10 @@ import org.lamisplus.modules.biometric.domain.dto.StoredBiometric;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +25,7 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     @Query(value ="SELECT DISTINCT recapture FROM biometric WHERE person_uuid=?1", nativeQuery = true)
     List<String> findRecapturesByPersonUuidAndRecaptures(String personUuid);
 
-    @Query(value ="SELECT recapture FROM biometric WHERE person_uuid=?1 ORDER BY id DESC LIMIT 1", nativeQuery = true)
+    @Query(value ="SELECT recapture FROM biometric WHERE person_uuid=?1 ORDER BY recapture DESC LIMIT 1", nativeQuery = true)
     Optional<Integer> findMaxRecapture(String personUuid);
     
     @Query(value ="SELECT COUNT(person_uuid) FROM biometric WHERE person_uuid=?1 AND enrollment_date=?2 AND archived=0", nativeQuery = true)
@@ -127,4 +129,10 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     @Query(value="SELECT id, first_name AS firstName, surname AS surName, hospital_number AS hospitalNumber, sex " +
             "FROM patient_person WHERE uuid=?1", nativeQuery = true)
     Optional<ClientIdentificationProject> getBiometricPersonData(String personUuid);
+
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Biometric b SET b.recapture = 0 WHERE b.recapture IS NULL")
+    void updateRecaptureNullField();
 }
