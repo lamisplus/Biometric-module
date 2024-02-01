@@ -19,6 +19,7 @@ import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.patient.repository.PersonRepository;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,9 +28,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class BiometricService {
-    public static final int UN_ARCHIVED = 0;
-    public static final int RECAPTURE = 0;
-    public static final int ARCHIVED = 1;
+    private static final int UN_ARCHIVED = 0;
+    private static final int RECAPTURE = 0;
+    private static final int ARCHIVED = 1;
+    private static final int BIOMETRIC_SIZE = 6;
     private final BiometricRepository biometricRepository;
     private final BiometricDeviceRepository biometricDeviceRepository;
     private final PersonRepository personRepository;
@@ -37,6 +39,10 @@ public class BiometricService {
     private final DeduplicationRepository deduplicationRepository;
 
     public BiometricDto biometricEnrollment(BiometricEnrollmentDto biometricEnrollmentDto, Boolean isMobile) {
+        if(biometricEnrollmentDto.getCapturedBiometricsList().size() < BIOMETRIC_SIZE){
+            throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Biometric template is less than 6");
+        }
+
         if(biometricEnrollmentDto.getType().equals(BiometricEnrollmentDto.Type.ERROR)){
             //IllegalTypeException
             throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Type is Error");
@@ -162,7 +168,13 @@ public class BiometricService {
             String deviceName, String reason, int imageQuality,
             Integer recapture, String recaptureMessage, Integer count, LocalDate date, Boolean isMobile) {
         Biometric biometric = new Biometric ();
-        biometric.setId (UUID.randomUUID ().toString ());
+//        check for mobile Id exist
+        if (capturedBiometricDto.getId() != null && isMobile) {
+            biometric.setId (capturedBiometricDto.getId());
+        }else{
+            biometric.setId (UUID.randomUUID ().toString ());
+        }
+
         biometric.setBiometricType (biometricType);
         biometric.setDeviceName (deviceName);
         biometric.setTemplate (capturedBiometricDto.getTemplate ());
@@ -226,9 +238,11 @@ public class BiometricService {
                 .orElseThrow(()-> new EntityNotFoundException(BiometricDevice.class, "id", ""+id));
         biometricDeviceRepository.delete(biometricDevice);
     }
-
     public List<BiometricDevice> getAllBiometricDevices(boolean active){
         if(active){
+
+            //update biometric recapture column to base line
+            biometricRepository.updateRecaptureNullField();
             return biometricDeviceRepository.getAllByActiveIsTrue();
         }
         return biometricDeviceRepository.findAll();
