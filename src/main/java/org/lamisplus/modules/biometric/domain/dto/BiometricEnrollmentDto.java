@@ -35,6 +35,7 @@ public class BiometricEnrollmentDto implements Serializable {
     private String reason;
     private int age;
     private Integer recapture;
+    private LocalDate replaceDate;
     private String recaptureMessage;
     private String hashed;
     private boolean match;

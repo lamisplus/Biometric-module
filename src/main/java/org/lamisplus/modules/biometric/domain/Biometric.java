@@ -76,6 +76,9 @@ public class Biometric extends BiometricAuditEntity  implements Serializable, Pe
     @Column(name = "recapture")
     private Integer recapture;
 
+    @Column(name = "replace_date")
+    private LocalDate replaceDate;
+
     @Column(name = "recapture_message")
     private String recaptureMessage;
 

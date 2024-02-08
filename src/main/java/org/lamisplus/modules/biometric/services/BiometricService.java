@@ -273,7 +273,9 @@ public class BiometricService {
 
         if(!recapturedBiometrics.isEmpty()){
             recapturedBiometrics = recapturedBiometrics.stream()
-                    .map(biometric -> {biometric.setRecapture(RECAPTURE); return biometric;})
+                    .map(biometric -> {biometric.setRecapture(RECAPTURE);
+                        biometric.setReplaceDate(LocalDate.now());
+                        return biometric;})
                     .collect(Collectors.toList());
         }else {
             throw new EntityNotFoundException(Biometric.class, "Recapture", "biometrics");
