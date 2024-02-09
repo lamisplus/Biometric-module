@@ -269,14 +269,34 @@ public class BiometricService {
         this.biometricRepository.deleteAll(this.getAllPersonBiometric(personId));
     }
 
-    public void makeBaseLine(String personUuid, LocalDate captureDate) {
+    public void makeBaseLine(String personUuid, LocalDate captureDate, Integer recapture) {
         List<Biometric> recapturedBiometrics = biometricRepository.findAllByPersonUuidAndDateAndArchived(personUuid, captureDate, UN_ARCHIVED);
         List<Biometric> baselineBiometrics = biometricRepository.findAllByPersonUuidAndRecaptureAndArchived(personUuid, RECAPTURE, UN_ARCHIVED);
 
-        if(!recapturedBiometrics.isEmpty()){
-            recapturedBiometrics = recapturedBiometrics.stream()
-                    .map(biometric -> {biometric.setRecapture(RECAPTURE);
+        // Filter recapturedBiometrics based on specific conditions
+        List<Biometric> filteredRecapturedBiometrics = recapturedBiometrics.stream()
+                .filter(recap -> recap.getPersonUuid().equals(personUuid))
+                .filter(recap -> recap.getRecapture().equals(recapture))
+                .filter(recap -> recap.getDate().equals(captureDate))
+                .collect(Collectors.toList());
+
+        if (!filteredRecapturedBiometrics.isEmpty()) {
+
+            // Override recapture and replaceDate properties for filteredRecapturedBiometrics
+            filteredRecapturedBiometrics = filteredRecapturedBiometrics.stream()
+                    .map(biometric -> {
+                        biometric.setRecapture(RECAPTURE);
                         biometric.setReplaceDate(REPLACE_DATE);
+                        return biometric;
+                    })
+                    .collect(Collectors.toList());
+
+            // Decrement recapture if it's not 0
+            recapturedBiometrics = recapturedBiometrics.stream()
+                    .map(biometric -> {
+                        if (biometric.getRecapture() != 0) {
+                            biometric.setRecapture(biometric.getRecapture() - 1);
+                        }
                         return biometric;})
                     .collect(Collectors.toList());
         }else {
