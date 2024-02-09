@@ -287,7 +287,7 @@
             </not>
         </preConditions>
         <sql>
-            ALTER TABLE biometric ALTER COLUMN replace_date TYPE DATE;
+            ALTER TABLE biometric ADD COLUMN replace_date DATE;
         </sql>
     </changeSet>
 
