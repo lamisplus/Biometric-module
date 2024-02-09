@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class BiometricService {
+
+    private static final LocalDate REPLACE_DATE = LocalDate.now();
     private static final int UN_ARCHIVED = 0;
     private static final int RECAPTURE = 0;
     private static final int ARCHIVED = 1;
@@ -273,7 +275,9 @@ public class BiometricService {
 
         if(!recapturedBiometrics.isEmpty()){
             recapturedBiometrics = recapturedBiometrics.stream()
-                    .map(biometric -> {biometric.setRecapture(RECAPTURE); return biometric;})
+                    .map(biometric -> {biometric.setRecapture(RECAPTURE);
+                        biometric.setReplaceDate(REPLACE_DATE);
+                        return biometric;})
                     .collect(Collectors.toList());
         }else {
             throw new EntityNotFoundException(Biometric.class, "Recapture", "biometrics");
