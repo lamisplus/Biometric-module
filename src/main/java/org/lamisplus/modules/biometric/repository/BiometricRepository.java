@@ -110,7 +110,7 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
 
     @Query(value="SELECT DISTINCT (b.recapture) AS recapture, " +
             "b.enrollment_date AS captureDate, b.person_uuid AS personUuid, " +
-            "b.count, b.archived " +
+            "b.count, b.archived, replace_date " +
             "FROM biometric b " +
             "INNER JOIN patient_person pp ON pp.uuid=b.person_uuid " +
             "WHERE pp.id=?1 AND b.archived != 1 AND pp.archived=0 " +
