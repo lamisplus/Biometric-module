@@ -107,7 +107,6 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     @Query(value="SELECT template FROM biometric WHERE person_uuid=?1 AND recapture=?2", nativeQuery = true)
     List<byte[]> getPersonUuidTemplatesForRecapture(String personUuid, Integer recapture);
 
-
     @Query(value="SELECT DISTINCT (b.recapture) AS recapture, " +
             "b.enrollment_date AS captureDate, b.person_uuid AS personUuid, " +
             "b.count, b.archived, replace_date AS replaceDate " +
@@ -115,7 +114,7 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
             "INNER JOIN patient_person pp ON pp.uuid=b.person_uuid " +
             "WHERE pp.id=?1 AND b.archived != 1 AND pp.archived=0 " +
             "ORDER BY recapture DESC", nativeQuery = true)
-    List<GroupedCapturedBiometric> getGroupedPersonBiometric(Long patientId);
+    List<GroupedCapturedBiometric> getGroupedPersonBiometric (Long patientId);
     
     List<Biometric> findAllByPersonUuidAndRecapture(String personUuid, Integer recapture);
 
