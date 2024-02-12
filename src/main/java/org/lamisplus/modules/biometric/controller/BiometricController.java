@@ -80,8 +80,8 @@ public class BiometricController {
 
     @PutMapping(BASE_URL_VERSION_ONE + "/person")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void makeBaseLine(@RequestParam String personUuid, @RequestParam LocalDate captureDate) {
-        biometricService.makeBaseLine (personUuid, captureDate);
+    public void makeBaseLine(@RequestParam String personUuid, @RequestParam LocalDate captureDate, @RequestParam Integer recapture) {
+        biometricService.makeBaseLine (personUuid, captureDate, recapture);
     }
     @DeleteMapping(BASE_URL_VERSION_ONE + "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
