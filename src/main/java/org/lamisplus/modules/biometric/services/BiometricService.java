@@ -291,11 +291,11 @@ public class BiometricService {
                     })
                     .collect(Collectors.toList());
 
-            // Decrement recapture if it's not 0
+            // Increment recapture if it's not 0
             recapturedBiometrics = recapturedBiometrics.stream()
                     .map(biometric -> {
                         if (biometric.getRecapture() != 0) {
-                            biometric.setRecapture(biometric.getRecapture() - 1);
+                            biometric.setRecapture(biometric.getRecapture() + 1);
                         }
                         return biometric;})
                     .collect(Collectors.toList());
