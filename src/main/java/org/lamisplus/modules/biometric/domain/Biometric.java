@@ -27,12 +27,6 @@ import java.util.UUID;
 public class Biometric extends BiometricAuditEntity  implements Serializable, Persistable<String> {
 
     @Id
-//    @GeneratedValue( generator = "UUID")
-//    @GenericGenerator(
-//            name = "UUID",
-//            strategy = "org.hibernate.id.UUIDGenerator"
-//    )
-//    @Basic(optional = false)
     @Column(name = "ID")
     private String id;
 
