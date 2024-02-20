@@ -9,6 +9,7 @@ menus:
     state: biometric
     url: /across/resources/static/biometric/index.html
 umdLocation: /across/resources/static/biometric/index.html
+gitHubLink: https://api.github.com/repos/lamisplus/Biometric-Module/releases/latest
 webModules:
   - breadcrumb: BIOMETRIC
     name: BiometricModule
