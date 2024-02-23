@@ -25,7 +25,7 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     @Query(value ="SELECT DISTINCT recapture FROM biometric WHERE person_uuid=?1", nativeQuery = true)
     List<String> findRecapturesByPersonUuidAndRecaptures(String personUuid);
 
-    @Query(value ="SELECT recapture FROM biometric WHERE person_uuid=?1 ORDER BY recapture DESC LIMIT 1", nativeQuery = true)
+    @Query(value ="SELECT MAX(recapture) FROM biometric WHERE person_uuid=?1 AND archived = 0", nativeQuery = true)
     Optional<Integer> findMaxRecapture(String personUuid);
     
     @Query(value ="SELECT COUNT(person_uuid) FROM biometric WHERE person_uuid=?1 AND enrollment_date=?2 AND archived=0", nativeQuery = true)
