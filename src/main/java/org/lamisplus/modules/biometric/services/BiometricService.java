@@ -2,7 +2,6 @@ package org.lamisplus.modules.biometric.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.base.controller.apierror.IllegalTypeException;
@@ -21,12 +20,15 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class BiometricService {
+
+    private static final LocalDate REPLACE_DATE = LocalDate.now();
     private static final int UN_ARCHIVED = 0;
     private static final int RECAPTURE = 0;
     private static final int ARCHIVED = 1;
@@ -38,21 +40,38 @@ public class BiometricService {
     private final DeduplicationRepository deduplicationRepository;
 
     public BiometricDto biometricEnrollment(BiometricEnrollmentDto biometricEnrollmentDto, Boolean isMobile) {
+        AtomicInteger existingCount = new AtomicInteger();
+        biometricEnrollmentDto.getCapturedBiometricsList().forEach(b -> {
+            if(b.getId()!= null && biometricRepository.findById(b.getId()).isPresent()){
+                existingCount.getAndIncrement();
+            }
+        });
+
+        if(existingCount.get() > 0){
+            LOG.info("Patient: " + biometricEnrollmentDto.getPatientId() + "'s prints have already been synced.");
+            return BiometricDto.builder()
+                    .numberOfFingers(biometricEnrollmentDto.getCapturedBiometricsList().size())
+                    .personId(biometricEnrollmentDto.getPatientId())
+                    .date(biometricEnrollmentDto.getEnrollmentDate() != null ? biometricEnrollmentDto.getEnrollmentDate() : LocalDate.now())
+                    .iso(true).build();
+        }
+
         if(biometricEnrollmentDto.getCapturedBiometricsList().size() < BIOMETRIC_SIZE){
+            LOG.error("Biometric Template is less than 6");
             throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Biometric template is less than 6");
         }
 
         if(biometricEnrollmentDto.getType().equals(BiometricEnrollmentDto.Type.ERROR)){
-            //IllegalTypeException
+            LOG.error("The templates are not valid");
             throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Type is Error");
         }
-        
-        
+
         Long personId = biometricEnrollmentDto.getPatientId ();
         Person person = personRepository.findById (personId)
                 .orElseThrow(() -> new EntityNotFoundException(BiometricEnrollmentDto.class,"patientId:", ""+personId));
     
         if(biometricRepository.getBiometricByDate(person.getUuid(), LocalDate.now()) > 0){
+            LOG.error("Fingerprints for today already synced for client: " + personId);
             throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Cannot capture on same date");
         }
         Optional<Integer> opRecapture = biometricRepository.findMaxRecapture(person.getUuid());
@@ -167,7 +186,13 @@ public class BiometricService {
             String deviceName, String reason, int imageQuality,
             Integer recapture, String recaptureMessage, Integer count, LocalDate date, Boolean isMobile) {
         Biometric biometric = new Biometric ();
-        biometric.setId (UUID.randomUUID ().toString ());
+//        check for mobile Id exist
+        if (capturedBiometricDto.getId() != null && isMobile) {
+            biometric.setId (capturedBiometricDto.getId());
+        }else{
+            biometric.setId (UUID.randomUUID ().toString ());
+        }
+
         biometric.setBiometricType (biometricType);
         biometric.setDeviceName (deviceName);
         biometric.setTemplate (capturedBiometricDto.getTemplate ());
@@ -231,9 +256,11 @@ public class BiometricService {
                 .orElseThrow(()-> new EntityNotFoundException(BiometricDevice.class, "id", ""+id));
         biometricDeviceRepository.delete(biometricDevice);
     }
-
     public List<BiometricDevice> getAllBiometricDevices(boolean active){
         if(active){
+
+            //update biometric recapture column to base line
+            biometricRepository.updateRecaptureNullField();
             return biometricDeviceRepository.getAllByActiveIsTrue();
         }
         return biometricDeviceRepository.findAll();
@@ -258,13 +285,35 @@ public class BiometricService {
         this.biometricRepository.deleteAll(this.getAllPersonBiometric(personId));
     }
 
-    public void makeBaseLine(String personUuid, LocalDate captureDate) {
+    public void makeBaseLine(String personUuid, LocalDate captureDate, Integer recapture) {
         List<Biometric> recapturedBiometrics = biometricRepository.findAllByPersonUuidAndDateAndArchived(personUuid, captureDate, UN_ARCHIVED);
         List<Biometric> baselineBiometrics = biometricRepository.findAllByPersonUuidAndRecaptureAndArchived(personUuid, RECAPTURE, UN_ARCHIVED);
 
-        if(!recapturedBiometrics.isEmpty()){
+        // Filter recapturedBiometrics based on specific conditions
+        List<Biometric> filteredRecapturedBiometrics = recapturedBiometrics.stream()
+                .filter(recap -> recap.getPersonUuid().equals(personUuid))
+                .filter(recap -> recap.getRecapture().equals(recapture))
+                .filter(recap -> recap.getDate().equals(captureDate))
+                .collect(Collectors.toList());
+
+        if (!filteredRecapturedBiometrics.isEmpty()) {
+
+            // Override recapture and replaceDate properties for filteredRecapturedBiometrics
+            filteredRecapturedBiometrics = filteredRecapturedBiometrics.stream()
+                    .map(biometric -> {
+                        biometric.setRecapture(RECAPTURE);
+                        biometric.setReplaceDate(REPLACE_DATE);
+                        return biometric;
+                    })
+                    .collect(Collectors.toList());
+
+            // Increment recapture if it's not 0
             recapturedBiometrics = recapturedBiometrics.stream()
-                    .map(biometric -> {biometric.setRecapture(RECAPTURE); return biometric;})
+                    .map(biometric -> {
+                        if (biometric.getRecapture() != 0) {
+                            biometric.setRecapture(biometric.getRecapture() + 1);
+                        }
+                        return biometric;})
                     .collect(Collectors.toList());
         }else {
             throw new EntityNotFoundException(Biometric.class, "Recapture", "biometrics");

@@ -11,6 +11,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.UUID;
 
 
 @Entity
@@ -26,12 +27,6 @@ import java.time.LocalDate;
 public class Biometric extends BiometricAuditEntity  implements Serializable, Persistable<String> {
 
     @Id
-    @GeneratedValue( generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
-    @Basic(optional = false)
     @Column(name = "ID")
     private String id;
 
@@ -76,6 +71,9 @@ public class Biometric extends BiometricAuditEntity  implements Serializable, Pe
     @Column(name = "recapture")
     private Integer recapture;
 
+    @Column(name = "replace_date")
+    private LocalDate replaceDate;
+
     @Column(name = "recapture_message")
     private String recaptureMessage;
 
@@ -88,6 +86,14 @@ public class Biometric extends BiometricAuditEntity  implements Serializable, Pe
     @Override
     public boolean isNew() {
         return id == null;
+    }
+
+    public void setId(String id) {
+        if (id != null && !id.isEmpty()) {
+            this.id = id;
+        } else {
+            this.id = UUID.randomUUID().toString();
+        }
     }
 
 }

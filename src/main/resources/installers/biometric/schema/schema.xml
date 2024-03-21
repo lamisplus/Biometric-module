@@ -279,4 +279,17 @@
                 );
         </sql>
     </changeSet>
+
+    <changeSet failOnError="false" author="Joshua Gabriel" id="biometrics-0014">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="biometric" columnName="replace_date" />
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE biometric ADD COLUMN replace_date DATE;
+        </sql>
+    </changeSet>
+
+
 </databaseChangeLog>
