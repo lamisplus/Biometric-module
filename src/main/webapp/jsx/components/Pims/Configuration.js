@@ -94,6 +94,7 @@ const Configuration = (props) => {
     e.preventDefault();
     if (validate()) {
       setSaving(true);
+      console.log(patDetails);
       axios
         .post(
           `${baseUrl}pims/config?username=${patDetails.username}&password=${patDetails.password}&url=${patDetails.url}`,

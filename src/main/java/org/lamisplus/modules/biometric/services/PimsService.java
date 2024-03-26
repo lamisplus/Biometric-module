@@ -28,7 +28,9 @@ import java.util.stream.Collectors;
 public class PimsService {
 	
 	//public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "http://stagedemo.phis3project.org.ng/pims";
-	public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "http://pimssandbox.phis3project.org.ng/api";
+	//public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "http://pimssandbox.phis3project.org.ng/api";
+
+	public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "https://pimssandbox.phis3project.org.ng/api/auth/token";
 	private final PimsTrackerRepository pimsTrackerRepository;
 	private final PimsConfigRepository pimsConfigRepository;
 	
@@ -36,6 +38,9 @@ public class PimsService {
 	
 	
 	public PimsConfig registerPimsConfig(String username, String password, String url){
+		username = "nonye.nwanya@thepalladiumgroup.com";
+		password = "]W(I*=v}-+z8h$F";
+		url = HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS;
 		return  pimsConfigRepository.save(new PimsConfig(username, password, url));
 	}
 	
@@ -92,7 +97,9 @@ public class PimsService {
 			LOG.info("datim code {}", organisationUnitIdentifier.getCode());
 		}
 		RestTemplate restTemplate = new RestTemplate();
-		String url = "http://pimssandbox.phis3project.org.ng/api/Prints/findClient";
+		//String url = "http://pimssandbox.phis3project.org.ng/api/Prints/findClient";
+
+		String url = "https://pimssandbox.phis3project.org.ng/api/Prints/findClient";
 		PimsAuthenticationResponse pimsAuthentication = getPimsAuthentication(restTemplate);
 		Optional<PimsConfig> config = pimsConfigRepository.findAll().stream()
 				.filter(c -> c.getArchived() == 0)
@@ -182,7 +189,7 @@ public class PimsService {
 			Optional<PimsConfig> config = pimsConfigRepository.findAll().stream()
 					.filter(c -> c.getArchived() == 0)
 					.findAny();
-			String url = "http://pimssandbox.phis3project.org.ng/api/auth/token";
+			String url = "https://pimssandbox.phis3project.org.ng/api/auth/token";
 			PimsUserCredentials userCredentials = null;
 			if(config.isPresent()){
 				PimsConfig pimsConfig = config.get();
@@ -192,7 +199,7 @@ public class PimsService {
 				
 			}else{
 				LOG.info("Hand coded configuration");
-				 userCredentials = new PimsUserCredentials("nonye.nwanya@thepalladiumgroup.com", "]W(I*=v}-+z8h$F");
+				 userCredentials = new PimsUserCredentials("nonye.nwanya@thepalladiumgroup.com", "Pass1word#");
 				LOG.info("payload: " + userCredentials.toString());
 			}
 			HttpEntity<PimsUserCredentials> loginEntity = new HttpEntity<>(userCredentials, GetHTTPHeaders());
