@@ -38,9 +38,6 @@ public class PimsService {
 	
 	
 	public PimsConfig registerPimsConfig(String username, String password, String url){
-		username = "nonye.nwanya@thepalladiumgroup.com";
-		password = "]W(I*=v}-+z8h$F";
-		url = HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS;
 		return  pimsConfigRepository.save(new PimsConfig(username, password, url));
 	}
 	
