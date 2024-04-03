@@ -24,4 +24,5 @@ public class BiometricDto implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
     private Boolean iso;
+    private String matchBiometricId;
 }

@@ -67,7 +67,7 @@ public class SecugenService {
 
         BiometricEnrollmentDto biometric = getBiometricEnrollmentDto(captureRequestDTO);
 
-        if(biometric.getMessage() == null)biometric.setMessage(new HashMap<>());
+        if(biometric.getMessage() == null) biometric.setMessage(new HashMap<>());
             // checks if the secugen device is active
         if (this.scannerIsNotSet(reader)) {
             biometric.getMessage().put(ERROR_MESSAGE, "READER NOT AVAILABLE");
@@ -113,7 +113,7 @@ public class SecugenService {
 
                 //recapture
                 if(recapture) {
-                    Optional<String> optionalPersonUuid= biometricRepository.getPersonUuid(captureRequestDTO.getPatientId());
+                    Optional<String> optionalPersonUuid = biometricRepository.getPersonUuid(captureRequestDTO.getPatientId());
                     recaptureOrIdentify(true, optionalPersonUuid, template, biometric);
                     LOG.info("Type is {}", BiometricEnrollmentDto.Type.values());
                 }else {
