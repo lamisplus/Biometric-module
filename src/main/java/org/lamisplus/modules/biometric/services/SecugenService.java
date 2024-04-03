@@ -1,5 +1,4 @@
 package org.lamisplus.modules.biometric.services;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
@@ -8,6 +7,7 @@ import org.lamisplus.modules.biometric.domain.ClientIdentificationProject;
 import org.lamisplus.modules.biometric.domain.Deduplication;
 import org.lamisplus.modules.biometric.domain.dto.*;
 import org.lamisplus.modules.biometric.enumeration.ErrorCode;
+import org.lamisplus.modules.biometric.enumeration.MatchTypes;
 import org.lamisplus.modules.biometric.repository.BiometricRepository;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
@@ -48,8 +48,6 @@ public class SecugenService {
     private final String RIGHT_THUMB = "Right Thumb";
     private final String RIGHT_RING_FINGER =  "Right Ring Finger";
     private final String RIGHT_LITTLE_FINGER =  "Right Little Finger";
-
-
     /**
      * Biometric enrollment
      * @param reader
@@ -64,7 +62,6 @@ public class SecugenService {
             this.emptyStoreByPersonId(captureRequestDTO.getPatientId());
             if(!biometricsInFacility.isEmpty()) biometricsInFacility.clear();
         }
-
         BiometricEnrollmentDto biometric = getBiometricEnrollmentDto(captureRequestDTO);
 
         if(biometric.getMessage() == null) biometric.setMessage(new HashMap<>());
@@ -410,6 +407,7 @@ public class SecugenService {
                     biometricEnrollmentDto.setMatch(true);
                     if (TEMPLATE_TYPE.equalsIgnoreCase(biometricEnrollmentDto.getTemplateType())) {
                         LOG.info("Perfect match...");
+                        biometricEnrollmentDto.setMATCH_TYPE(MatchTypes.PerfectMatch.getMatchType());
                         biometricEnrollmentDto.getMessage().put(MATCH, "Perfect...");
                         biometricEnrollmentDto.setType(BiometricEnrollmentDto.Type.SUCCESS);
                         biometricEnrollmentDto.getMessage().put(RECAPTURE_MESSAGE, "SUCCESSFULLY RECAPTURED, PERFECT MATCH");
@@ -417,6 +415,7 @@ public class SecugenService {
     
                     } else {
                         LOG.info("Imperfect match...");
+                        biometricEnrollmentDto.setMATCH_TYPE(MatchTypes.ImperfectMatch.getMatchType());
                         biometricEnrollmentDto.getMessage().put(RECAPTURE_MESSAGE, "SUCCESSFULLY RECAPTURED, IMPERFECT MATCH");
                         biometricEnrollmentDto.setType(BiometricEnrollmentDto.Type.WARNING);
                         biometricEnrollmentDto.getMessage().put(MATCH, "Imperfect...");
@@ -441,6 +440,7 @@ public class SecugenService {
                 }
             }
             LOG.info("no match...");
+            biometricEnrollmentDto.setMATCH_TYPE(MatchTypes.NoMatch.getMatchType());
             biometricEnrollmentDto.setType(BiometricEnrollmentDto.Type.WARNING);
             biometricEnrollmentDto.getMessage().put(MATCH, "Biometric not found...");
             biometricEnrollmentDto.getMessage().put(RECAPTURE_MESSAGE, "NO MATCH...");
