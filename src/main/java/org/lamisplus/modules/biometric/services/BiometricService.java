@@ -308,13 +308,13 @@ public class BiometricService {
                     .collect(Collectors.toList());
 
             // Increment recapture if it's not 0
-            recapturedBiometrics = recapturedBiometrics.stream()
-                    .map(biometric -> {
-                        if (biometric.getRecapture() != 0) {
-                            biometric.setRecapture(biometric.getRecapture() + 1);
-                        }
-                        return biometric;})
-                    .collect(Collectors.toList());
+//            recapturedBiometrics = recapturedBiometrics.stream()
+//                    .map(biometric -> {
+//                        if (biometric.getRecapture() != 0) {
+//                            biometric.setRecapture(biometric.getRecapture() + 1);
+//                        }
+//                        return biometric;})
+//                    .collect(Collectors.toList());
         }else {
             throw new EntityNotFoundException(Biometric.class, "Recapture", "biometrics");
         }
