@@ -45,8 +45,4 @@ public class BiometricEnrollmentDto implements Serializable {
     private String matchType;
     private String matchBiometricId;
     private String matchPersonUuid;
-
-    public void setMatchType(String matchType) {
-        this.matchType = matchType;
-    }
 }
