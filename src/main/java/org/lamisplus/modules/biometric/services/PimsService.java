@@ -128,7 +128,9 @@ public class PimsService {
 		LOG.info("saving Response on system ");
 		String pimPatientId = null;
 		if(!response.getEnrollments().isEmpty()){
-			pimPatientId = response.getEnrollments().get(0).getPatientIdentifier();
+			pimPatientId = response.getEnrollments().get(0)
+
+					.getPatientId();
 		}
 		Optional<PimsTracker> pimsTrackerOptional =
 				pimsTrackerRepository.getPimsTrackerByPersonUuidAndFacilityIdAndArchived(patientId, facilityId,0);
