@@ -74,6 +74,15 @@ public class Biometric extends BiometricAuditEntity  implements Serializable, Pe
     @Column(name = "replace_date")
     private LocalDate replaceDate;
 
+    @Column(name = "match_type")
+    private String matchType;
+
+    @Column(name = "match_biometric_id")
+    private String matchBiometricId;
+
+    @Column(name = "match_person_uuid")
+    private String matchPersonUuid;
+
     @Column(name = "recapture_message")
     private String recaptureMessage;
 
