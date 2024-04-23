@@ -78,10 +78,17 @@ public class BiometricService {
         Optional<String> opNullpRecapture = biometricRepository.findNotNullReplaceDate(person.getUuid());
         Integer recapture=-1;
         if(opRecapture.isPresent())recapture=Integer.valueOf(opRecapture.get());
-            if (opNullpRecapture.isPresent()) {
-                recapture = +2;
+//            if (opNullpRecapture.isPresent()) {
+//                recapture = +2;
+//        } else Integer recap = ++recapture;
+
+        if (opNullpRecapture.isPresent()) {
+            recapture += 2;
+        } else {
+            recapture++;
         }
-        Integer recap = ++recapture;
+        Integer recap = recapture;
+
         String biometricType = biometricEnrollmentDto.getBiometricType ();
         LocalDate enrollmentDate = (isMobile && biometricEnrollmentDto.getEnrollmentDate() != null)? biometricEnrollmentDto.getEnrollmentDate() : LocalDate.now();
         String deviceName = biometricEnrollmentDto.getDeviceName ();
