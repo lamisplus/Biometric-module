@@ -7,7 +7,7 @@ import org.springframework.core.annotation.Order;
 @Order(1)
 @Installer(name = "schema-installer",
         description = "Installs the required database tables",
-        version = 10)
+        version = 11)
 public class BiometricModuleInstaller extends AcrossLiquibaseInstaller {
     public BiometricModuleInstaller() {
         super("classpath:installers/biometric/schema/schema.xml");

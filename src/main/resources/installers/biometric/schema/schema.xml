@@ -291,5 +291,19 @@
         </sql>
     </changeSet>
 
+    <changeSet failOnError="false" author="Joshua Gabriel" id="biometrics-0015">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="biometric" columnName="match_type" />
+                <columnExists tableName="biometric" columnName="match_biometric_id" />
+                <columnExists tableName="biometric" columnName="match_person_uuid" />
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE biometric ADD COLUMN match_type varchar(255);
+            ALTER TABLE biometric ADD COLUMN match_biometric_id varchar(255);
+            ALTER TABLE biometric ADD COLUMN match_person_uuid varchar(255);
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>

@@ -26,7 +26,6 @@ public class BiometricModule extends AcrossModule {
 	public static final String NAME = "BiometricModule";
 	public static String modulePath = System.getProperty("user.dir");
 
-
 	public BiometricModule() {
 		super ();
 		addApplicationContextConfigurer (new ComponentScanConfigurer (
