@@ -22,6 +22,8 @@ import java.util.Set;
 public interface BiometricRepository extends JpaRepository<Biometric, String> {
     List<Biometric> findAllByPersonUuid(String personUuid);
 
+    @Query(value ="SELECT DISTINCT ON (person_uuid) person_uuid, replace_date FROM biometric WHERE replace_date IS NOT NULL AND person_uuid=?1 AND archived = 0", nativeQuery = true)
+    Optional<String> findNotNullReplaceDate (String personUuid);
     @Query(value ="SELECT DISTINCT recapture FROM biometric WHERE person_uuid=?1", nativeQuery = true)
     List<String> findRecapturesByPersonUuidAndRecaptures(String personUuid);
 

@@ -9,4 +9,7 @@ public class CapturedBiometricDto {
     private byte[] template;
     private String hashed;
     private Integer imageQuality;
+    private String matchType;
+    private String matchBiometricId;
+    private String matchPersonUuid;
 }

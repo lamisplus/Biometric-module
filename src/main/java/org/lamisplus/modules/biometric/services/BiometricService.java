@@ -75,18 +75,31 @@ public class BiometricService {
             throw new IllegalTypeException(BiometricEnrollmentDto.class,"Biometric Error:", "Cannot capture on same date");
         }
         Optional<Integer> opRecapture = biometricRepository.findMaxRecapture(person.getUuid());
+        Optional<String> opNullpRecapture = biometricRepository.findNotNullReplaceDate(person.getUuid());
         Integer recapture=-1;
         if(opRecapture.isPresent())recapture=Integer.valueOf(opRecapture.get());
-        Integer recap = ++recapture;
+//            if (opNullpRecapture.isPresent()) {
+//                recapture = +2;
+//        } else Integer recap = ++recapture;
+
+        if (opNullpRecapture.isPresent()) {
+            recapture += 2;
+        } else {
+            recapture++;
+        }
+        Integer recap = recapture;
+
         String biometricType = biometricEnrollmentDto.getBiometricType ();
         LocalDate enrollmentDate = (isMobile && biometricEnrollmentDto.getEnrollmentDate() != null)? biometricEnrollmentDto.getEnrollmentDate() : LocalDate.now();
         String deviceName = biometricEnrollmentDto.getDeviceName ();
         String reason = biometricEnrollmentDto.getReason();
+
         List<CapturedBiometricDto> capturedBiometricsList = biometricEnrollmentDto.getCapturedBiometricsList ();
         List<Biometric> biometrics = capturedBiometricsList.stream ()
                 .map (capturedBiometricDto -> convertDtoToEntity (capturedBiometricDto, person, biometricType, deviceName,
                         reason, capturedBiometricDto.getImageQuality(),
-                        recap, biometricEnrollmentDto.getRecaptureMessage(), capturedBiometricsList.size(), enrollmentDate, isMobile))
+                        recap, biometricEnrollmentDto.getRecaptureMessage(), capturedBiometricsList.size(), enrollmentDate, isMobile, biometricEnrollmentDto.getMatchType(),
+                        biometricEnrollmentDto.getMatchPersonUuid(), biometricEnrollmentDto.getMatchBiometricId()))
                 .collect (Collectors.toList ());
         biometricRepository.saveAll (biometrics);
 
@@ -109,6 +122,8 @@ public class BiometricService {
         }
         return getBiometricDto (biometrics, personId);
     }
+
+
     public CapturedBiometricDTOS getByPersonId(Long personId) {
         Person person = personRepository.findById (personId)
                 .orElseThrow (()-> new EntityNotFoundException (Person.class, "Id", ""+personId));
@@ -140,6 +155,9 @@ public class BiometricService {
         capturedBiometricDto.setTemplateType(biometric.getTemplateType());
         if(biometric.getHashed() != null)capturedBiometricDto.setHashed(biometric.getHashed());
         capturedBiometricDto.setImageQuality(biometric.getImageQuality());
+        capturedBiometricDto.setMatchType(biometric.getMatchType());
+        capturedBiometricDto.setMatchPersonUuid(biometric.getPersonUuid());
+        capturedBiometricDto.setMatchBiometricId(biometric.getId());
         capturedBiometricDtos.getCapturedBiometricsList().add(capturedBiometricDto);
 
         return capturedBiometricDtos;
@@ -158,6 +176,9 @@ public class BiometricService {
                         capturedBiometricDto.setTemplate(biometric1.getTemplate());
                         capturedBiometricDto.setTemplateType(biometric1.getTemplateType());
                         capturedBiometricDto.setImageQuality(biometric1.getImageQuality());
+                        capturedBiometricDto.setMatchType(biometric1.getMatchType());
+                        capturedBiometricDto.setMatchPersonUuid(biometric1.getPersonUuid());
+                        capturedBiometricDto.setMatchBiometricId(biometric1.getMatchBiometricId());
                         if(biometric1.getHashed() != null)capturedBiometricDto.setHashed(biometric1.getHashed());
                         capturedBiometrics.add(capturedBiometricDto);
                     });
@@ -182,9 +203,10 @@ public class BiometricService {
     }
     private Biometric convertDtoToEntity(
             CapturedBiometricDto capturedBiometricDto,
+           // BiometricEnrollmentDto biometricEnrollmentDto,
             Person person, String biometricType,
             String deviceName, String reason, int imageQuality,
-            Integer recapture, String recaptureMessage, Integer count, LocalDate date, Boolean isMobile) {
+            Integer recapture, String recaptureMessage, Integer count, LocalDate date, Boolean isMobile, String matchType, String matchPerson, String matchBiometric) {
         Biometric biometric = new Biometric ();
 //        check for mobile Id exist
         if (capturedBiometricDto.getId() != null && isMobile) {
@@ -207,6 +229,9 @@ public class BiometricService {
         biometric.setRecapture(recapture);
         biometric.setRecaptureMessage(recaptureMessage);
         biometric.setCount(count);
+        biometric.setMatchType(capturedBiometricDto.getMatchType());
+        biometric.setMatchPersonUuid(person.getUuid ());
+        biometric.setMatchBiometricId(capturedBiometricDto.getId());
         Optional<User> userWithRoles = userService.getUserWithRoles ();
         if(userWithRoles.isPresent ()){
             User user = userWithRoles.get ();
@@ -308,13 +333,13 @@ public class BiometricService {
                     .collect(Collectors.toList());
 
             // Increment recapture if it's not 0
-            recapturedBiometrics = recapturedBiometrics.stream()
-                    .map(biometric -> {
-                        if (biometric.getRecapture() != 0) {
-                            biometric.setRecapture(biometric.getRecapture() + 1);
-                        }
-                        return biometric;})
-                    .collect(Collectors.toList());
+//            recapturedBiometrics = recapturedBiometrics.stream()
+//                    .map(biometric -> {
+//                        if (biometric.getRecapture() != 0) {
+//                            biometric.setRecapture(biometric.getRecapture() + 1);
+//                        }
+//                        return biometric;})
+//                    .collect(Collectors.toList());
         }else {
             throw new EntityNotFoundException(Biometric.class, "Recapture", "biometrics");
         }
