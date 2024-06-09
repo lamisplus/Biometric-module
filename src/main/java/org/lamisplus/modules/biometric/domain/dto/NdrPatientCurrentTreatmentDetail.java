@@ -11,6 +11,7 @@ public class NdrPatientCurrentTreatmentDetail {
 	private String nin;
 	private String clientId;
 	private String patientId;
+	private String patientIdentifier;
 	private String sex;
 	private String age;
 	private String dateOfBirth;
