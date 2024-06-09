@@ -14,7 +14,6 @@
 	<artifactId>biometric</artifactId>
 	<version>2.0.6</version>
 
-
 	<packaging>jar</packaging>
 	<description>Biometric Module</description>
 	<name>biometric</name>
