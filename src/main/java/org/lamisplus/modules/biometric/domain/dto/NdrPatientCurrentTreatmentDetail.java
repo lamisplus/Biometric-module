@@ -33,6 +33,7 @@ public class NdrPatientCurrentTreatmentDetail {
 	private String state;
 	private String lga;
 	private String subjectId;
+
 	
 //	        "stateName": "Benue",
 //			"facilityName": "Johnson Hospital",

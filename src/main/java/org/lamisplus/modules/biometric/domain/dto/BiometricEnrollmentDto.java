@@ -14,6 +14,7 @@ import java.util.List;
 public class BiometricEnrollmentDto implements Serializable {
     @NotNull(message = "patientId is mandatory")
     private Long patientId;
+    private String PersonUuid;
     private HashMap<String, String> message;
     private byte[] template;
     private List<CapturedBiometricDto> capturedBiometricsList;
@@ -42,4 +43,7 @@ public class BiometricEnrollmentDto implements Serializable {
     private Deduplication deduplication;
     private LocalDate enrollmentDate;
     private ClientIdentificationDTO clientIdentificationDTO;
+    private String matchType;
+    private String matchBiometricId;
+    private String matchPersonUuid;
 }
