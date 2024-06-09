@@ -30,7 +30,7 @@ public class PimsService {
 	//public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "http://stagedemo.phis3project.org.ng/pims";
 	//public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "http://pimssandbox.phis3project.org.ng/api";
 
-	public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "https://pimssandbox.phis3project.org.ng/api/auth/token";
+	public static final String HTTP_STAGEDEMO_PHIS_3_PROJECT_ORG_NG_PIMS = "*****";
 	private final PimsTrackerRepository pimsTrackerRepository;
 	private final PimsConfigRepository pimsConfigRepository;
 	
@@ -195,8 +195,7 @@ public class PimsService {
 				userCredentials = new PimsUserCredentials(pimsConfig.getUsername(), pimsConfig.getPassword());
 				
 			}else{
-				LOG.info("Hand coded configuration");
-				 userCredentials = new PimsUserCredentials("nonye.nwanya@thepalladiumgroup.com", "Pass1word#");
+				 userCredentials = new PimsUserCredentials("******", "******");
 				LOG.info("payload: " + userCredentials.toString());
 			}
 			HttpEntity<PimsUserCredentials> loginEntity = new HttpEntity<>(userCredentials, GetHTTPHeaders());
