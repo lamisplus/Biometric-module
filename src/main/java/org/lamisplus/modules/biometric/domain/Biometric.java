@@ -92,6 +92,14 @@ public class Biometric extends BiometricAuditEntity  implements Serializable, Pe
     @Column(name = "count")
     private Integer count;
 
+    @Column(name = "latitude")
+    private String latitude;
+
+    @Column(name = "longitude")
+    private String longitude;
+
+
+
     @Override
     public boolean isNew() {
         return id == null;

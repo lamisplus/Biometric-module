@@ -3,6 +3,7 @@ package org.lamisplus.modules.biometric.domain.dto;
 import lombok.Data;
 import org.lamisplus.modules.biometric.domain.Deduplication;
 
+import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -46,4 +47,6 @@ public class BiometricEnrollmentDto implements Serializable {
     private String matchType;
     private String matchBiometricId;
     private String matchPersonUuid;
+    private String latitude;
+    private String longitude;
 }
