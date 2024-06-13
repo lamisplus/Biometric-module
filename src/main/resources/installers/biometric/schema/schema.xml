@@ -306,4 +306,17 @@
         </sql>
     </changeSet>
 
+    <changeSet failOnError="false" author="Joshua Gabriel" id="biometrics-0016">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="biometric" columnName="latitude" />
+                <columnExists tableName="biometric" columnName="longitude" />
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE biometric ADD COLUMN latitude varchar(255);
+            ALTER TABLE biometric ADD COLUMN longitude varchar(255);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
