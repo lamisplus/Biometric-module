@@ -136,4 +136,7 @@ public interface BiometricRepository extends JpaRepository<Biometric, String> {
     @Transactional
     @Query("UPDATE Biometric b SET b.recapture = 0 WHERE b.recapture IS NULL")
     void updateRecaptureNullField();
+
+    @Query(value = "SELECT recapture, COUNT(*) FROM biometric WHERE person_uuid = ?1 and archived = 0 GROUP BY recapture", nativeQuery = true)
+    List<GroupedCapturedBiometric> getPatientBiometricCount(String personUuid);
 }

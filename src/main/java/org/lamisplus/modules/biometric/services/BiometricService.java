@@ -381,8 +381,7 @@ public class BiometricService {
      * @return a List of a person Biometric for a specific captured instance
      */
     public List<Biometric> getBiometricsByPersonUuidAndRecapture(String personUuid, Integer recapture) {
-        List<Biometric> personBiometrics = biometricRepository.findAllByPersonUuidAndRecaptureAndArchived(personUuid, recapture, 0);
-        return personBiometrics;
+        return biometricRepository.findAllByPersonUuidAndRecaptureAndArchived(personUuid, recapture, 0);
     }
 
     /**
@@ -413,4 +412,13 @@ public class BiometricService {
         }
     }
 
+    public List<GroupedCapturedBiometric> getPatientBiometricCount(String personUuid) {
+        try {
+            System.out.println("hereereer");
+            return biometricRepository.getPatientBiometricCount(personUuid);
+        }catch (Exception e){
+            System.out.println("Excpeee");
+            e.printStackTrace();}
+        return null;
+    }
 }
